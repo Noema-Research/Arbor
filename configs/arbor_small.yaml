@@ -1,0 +1,79 @@
+# Arbor Small - Tiny demo configuration
+# Fast training for demos and testing
+
+model:
+  vocab_size: 1000
+  dim: 256
+  num_layers: 4
+  num_heads: 4
+  ffn_dim: 1024
+  max_seq_length: 512
+  dropout: 0.1
+  activation: "gelu"
+  causal: true
+  tie_word_embeddings: true
+
+# Dataset configuration
+data:
+  type: "synthetic"
+  vocab_size: 1000
+  seq_length: 512
+  num_sequences: 5000
+  batch_size: 16
+  val_split: 0.1
+
+# Training configuration
+training:
+  max_steps: 2000
+  learning_rate: 5e-4
+  weight_decay: 0.01
+  optimizer: "adamw"
+  betas: [0.9, 0.95]
+  
+  # Mixed precision and efficiency
+  use_amp: true
+  gradient_accumulation_steps: 2
+  max_grad_norm: 1.0
+  
+  # Scheduling
+  use_scheduler: true
+  warmup_steps: 200
+  
+  # Logging and checkpointing
+  log_every: 50
+  eval_every: 250
+  save_every: 500
+
+# Growth configuration (disabled for baseline)
+growth:
+  enabled: false
+  add_hidden: 128
+  max_events: 3
+  cooldown_steps: 500
+  layer_selection: "uniform"  # "uniform", "top_k", "bottom_k"
+  layers_per_event: 2
+  new_param_lr_multiplier: 1.0
+  
+  triggers:
+    - type: "plateau"
+      window_steps: 300
+      eps: 0.01
+
+# Infrastructure
+infrastructure:
+  device: "auto"  # "auto", "cuda", "cpu"
+  num_workers: 2
+  pin_memory: true
+  
+# Logging
+logging:
+  log_level: "INFO"
+  use_wandb: true
+  wandb_project: "arbor-o1-demo"
+  checkpoint_dir: "checkpoints"
+  
+# Experiment tracking
+experiment:
+  name: "arbor_small_baseline"
+  tags: ["demo", "small", "baseline"]
+  notes: "Small model for quick demos and testing"

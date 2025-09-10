@@ -1,0 +1,55 @@
+{
+  "_name_or_path": "arbor-500m-1b",
+  "architectures": [
+    "ArborForCausalLM"
+  ],
+  "model_type": "arbor",
+  "vocab_size": 128000,
+  "hidden_size": 1024,
+  "num_hidden_layers": 24,
+  "num_attention_heads": 16,
+  "intermediate_size": 4096,
+  "max_position_embeddings": 131072,
+  "rope_theta": 10000.0,
+  "rope_scaling": {
+    "type": "linear",
+    "factor": 32.0
+  },
+  "growth_factor": 2.0,
+  "max_growth_steps": 8,
+  "growth_threshold": 0.95,
+  "expandable_layers": [
+    6,
+    12,
+    18
+  ],
+  "hidden_dropout_prob": 0.1,
+  "attention_probs_dropout_prob": 0.1,
+  "layer_norm_eps": 1e-05,
+  "initializer_range": 0.02,
+  "use_cache": true,
+  "pad_token_id": 0,
+  "bos_token_id": 1,
+  "eos_token_id": 2,
+  "torch_dtype": "float16",
+  "transformers_version": "4.35.0",
+  "use_sliding_window": false,
+  "sliding_window": null,
+  "attention_bias": false,
+  "attention_dropout": 0.0,
+  "custom_metadata": {
+    "base_parameters": "699M",
+    "max_parameters": "799M",
+    "growth_potential": "101M",
+    "training_framework": "arbor-o1",
+    "version": "1.0.0",
+    "dynamic_growth": true,
+    "tokenizer_type": "hermes-4-405b",
+    "context_scaling": "rope_linear",
+    "max_context_demo": "4K",
+    "max_context_supported": "128K",
+    "efficient_attention": true,
+    "model_format": "safetensors"
+  },
+  "safetensors": true
+}

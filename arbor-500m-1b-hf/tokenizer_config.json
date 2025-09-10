@@ -1,0 +1,14 @@
+{
+  "add_bos_token": true,
+  "add_eos_token": false,
+  "bos_token": "<|begin_of_text|>",
+  "eos_token": "<|end_of_text|>",
+  "pad_token": "<|end_of_text|>",
+  "unk_token": "<unk>",
+  "model_max_length": 131072,
+  "tokenizer_class": "LlamaTokenizer",
+  "legacy": true,
+  "vocab_size": 128000,
+  "clean_up_tokenization_spaces": false,
+  "use_default_system_prompt": false
+}

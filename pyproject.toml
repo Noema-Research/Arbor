@@ -1,0 +1,79 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "arbor-o1-living-ai"
+version = "0.1.0"
+description = "Arbor-o1: A dynamically expanding transformer architecture"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Arbor Research", email = "research@arbor.ai"}
+]
+keywords = ["deep-learning", "transformer", "dynamic-architecture", "pytorch"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "torch>=2.0.0",
+    "numpy>=1.21.0",
+    "tqdm>=4.64.0",
+    "omegaconf>=2.3.0",
+    "wandb>=0.15.0",
+    "datasets>=2.12.0",
+    "transformers>=4.30.0",
+    "tokenizers>=0.13.0",
+    "scipy>=1.9.0",
+    "matplotlib>=3.5.0",
+    "seaborn>=0.11.0",
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=22.0.0",
+    "isort>=5.10.0",
+    "flake8>=4.0.0",
+    "mypy>=0.991",
+]
+
+[project.optional-dependencies]
+dev = [
+    "jupyter>=1.0.0",
+    "ipykernel>=6.0.0",
+    "deepspeed>=0.9.0",
+    "accelerate>=0.20.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/arbor-research/arbor-o1-living-ai"
+"Bug Reports" = "https://github.com/arbor-research/arbor-o1-living-ai/issues"
+"Source" = "https://github.com/arbor-research/arbor-o1-living-ai"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["arbor*"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
