@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -26,41 +26,31 @@ classifiers = [
 ]
 
 dependencies = [
-    "torch>=2.0.0",
+    "torch>=1.12.0",
     "numpy>=1.21.0",
     "tqdm>=4.64.0",
-    "omegaconf>=2.3.0",
-    "wandb>=0.15.0",
-    "datasets>=2.12.0",
-    "transformers>=4.30.0",
+    "transformers>=4.20.0",
     "tokenizers>=0.13.0",
-    "scipy>=1.9.0",
     "matplotlib>=3.5.0",
-    "seaborn>=0.11.0",
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "black>=22.0.0",
-    "isort>=5.10.0",
-    "flake8>=4.0.0",
-    "mypy>=0.991",
 ]
 
 [project.optional-dependencies]
 dev = [
     "jupyter>=1.0.0",
-    "ipykernel>=6.0.0",
-    "deepspeed>=0.9.0",
-    "accelerate>=0.20.0",
+    "datasets>=2.0.0",
+    "wandb>=0.12.0",
+    "pytest>=7.0.0",
+    "black>=22.0.0",
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/arbor-research/arbor-o1-living-ai"
-"Bug Reports" = "https://github.com/arbor-research/arbor-o1-living-ai/issues"
-"Source" = "https://github.com/arbor-research/arbor-o1-living-ai"
+"Homepage" = "https://github.com/Noema-Research/Arbor"
+"Bug Reports" = "https://github.com/Noema-Research/Arbor/issues"
+"Source" = "https://github.com/Noema-Research/Arbor"
 
 [tool.setuptools.packages.find]
-where = ["."]
 include = ["arbor*"]
+exclude = ["tests*"]
 
 [tool.black]
 line-length = 88
