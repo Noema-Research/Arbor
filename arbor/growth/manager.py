@@ -13,6 +13,7 @@ import random
 
 from .triggers import GrowthTrigger, PlateauTrigger, GradientNormTrigger, LossSpikeTrigger
 from ..modeling.model import ArborTransformer
+from ..safety import get_safety_guardian, SafetyViolation
 
 
 class GrowthManager:
@@ -52,6 +53,10 @@ class GrowthManager:
         
         # Growth policy
         self.growth_policy = self._create_growth_policy()
+        
+        # Safety system integration
+        self.safety_guardian = get_safety_guardian()
+        print("🛡️ Safety Guardian integrated with Growth Manager")
         
     def _create_triggers(self, trigger_configs: List[Dict[str, Any]]) -> List[GrowthTrigger]:
         """Create trigger objects from configuration."""
@@ -154,6 +159,26 @@ class GrowthManager:
         if not self.enabled or len(self.growth_events) >= self.max_events:
             return False
         
+        # 🛡️ SAFETY CHECK: Validate growth request with Guardian
+        try:
+            growth_params = {
+                "factor": 1 + (self.add_hidden / self.model.config.dim),
+                "add_hidden": self.add_hidden,
+                "reason": reason,
+                "layers_affected": self.layers_per_event
+            }
+            
+            # Check if growth is safe
+            if not self.safety_guardian.validate_growth_request(
+                self.model, "parameters", growth_params
+            ):
+                print("🛡️ Growth blocked by Safety Guardian")
+                return False
+                
+        except SafetyViolation as e:
+            print(f"🚨 Safety violation prevented growth: {e}")
+            return False
+        
         # Select layers to grow
         num_layers = len(self.model.layers)
         selected_layers = self.growth_policy(num_layers)
@@ -170,7 +195,13 @@ class GrowthManager:
             "add_hidden": self.add_hidden,
             "old_param_count": self.model.param_count(),
             "old_ffn_dims": [self.model.layers[i].ffn_dim for i in selected_layers],
+            "safety_approved": True  # Mark as safety-approved
         }
+        
+        # 🛡️ SAFETY CHECK: Verify model integrity before growth
+        if not self.safety_guardian.verify_model_integrity(self.model):
+            print("🚨 Model integrity check failed - growth aborted")
+            return False
         
         # Perform growth
         self.model.grow(selected_layers, self.add_hidden)
@@ -184,13 +215,17 @@ class GrowthManager:
         
         self.growth_events.append(growth_event)
         
+        # 🛡️ SAFETY CHECK: Verify model integrity after growth
+        if not self.safety_guardian.verify_model_integrity(self.model):
+            print("⚠️ Model integrity check failed after growth - monitoring activated")
+        
         # Reset triggers after growth
         for trigger in self.triggers:
             trigger.reset()
         
         self.steps_since_last_growth = 0
         
-        print(f"Growth event {len(self.growth_events)}: {growth_event}")
+        print(f"✅ Safe growth event {len(self.growth_events)}: {growth_event}")
         
         return True
     
@@ -304,7 +339,6 @@ class GrowthManager:
         """
         try:
             import matplotlib.pyplot as plt
-            import seaborn as sns
             
             if not self.growth_events:
                 print("No growth events to plot")

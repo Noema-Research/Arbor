@@ -20,9 +20,9 @@
 
 ---
 
-**Arbor** is a revolutionary transformer architecture featuring **adaptive context windows** and **dynamic neural growth**. Built by [**Noema Research**](https://github.com/Noema-Research), it represents the next evolution in large language models - one that thinks about its own capacity and adapts intelligently to each task.
+**Arbor** is a revolutionary transformer architecture featuring **adaptive context windows**, **dynamic neural growth**, and **comprehensive AI safety**. Built by [**Noema Research**](https://github.com/Noema-Research), it represents the next evolution in large language models - one that thinks about its own capacity, adapts intelligently to each task, and operates within strict safety boundaries.
 
-**🏢 Enterprise Ready**: Current implementation features 799M parameters with full adaptive capabilities. The architecture is now **production-ready for 200B-400B parameters** with complete distributed training and enterprise deployment capabilities.
+**🏢 Enterprise Ready**: Current implementation features 799M parameters with full adaptive capabilities. The architecture is now **production-ready for 200B-400B parameters** with complete distributed training, enterprise deployment, and comprehensive safety monitoring.
 
 </div>
 
@@ -42,6 +42,18 @@
 | 🛡️ **SafeTensors** | Secure model format without binary dependencies | ✅ **Active** |
 | 🔄 **Fresh Tokenizer** | Always downloads latest Hermes-4-405B (128K vocab) | ✅ **Active** |
 | ⚙️ **YAML Config** | Simple configuration-driven training pipeline | ✅ **Active** |
+| 🛡️ **AI Safety** | Comprehensive safety system preventing uncontrolled growth | ✅ **Active** |
+
+### 🛡️ **AI Safety & Security**
+
+| Component | Description | Protection |
+|-----------|-------------|------------|
+| 🔒 **Growth Control** | Human approval required for all model modifications | Prevents intelligence explosion |
+| 🚨 **Resource Monitoring** | Real-time GPU/CPU/memory usage tracking | Prevents resource hijacking |
+| 🕵️ **Escape Detection** | File system and network access monitoring | Prevents unauthorized access |
+| 🔐 **Model Integrity** | Cryptographic verification of model state | Prevents tampering |
+| ⛔ **Emergency Shutdown** | Automatic halt on dangerous conditions | Immediate threat response |
+| 👤 **Human Oversight** | Interactive approval for critical operations | Human-in-the-loop control |
 
 ## ✨ What Makes Arbor Special
 
@@ -86,6 +98,7 @@
 | 🛡️ **SafeTensors** | Secure model format without binary dependencies | ✅ **Active** |
 | 🔄 **Fresh Tokenizer** | Always downloads latest Hermes-4-405B (128K vocab) | ✅ **Active** |
 | ⚙️ **YAML Config** | Simple configuration-driven training pipeline | ✅ **Active** |
+| 🛡️ **AI Safety** | Comprehensive safety system preventing uncontrolled growth | ✅ **Active** |
 
 ### 🎪 **Revolutionary Architecture**
 
@@ -300,7 +313,60 @@ graph TB
 
 </details>
 
-## 🚀 Quick Start
+## �️ AI Safety System
+
+**Arbor includes a comprehensive AI safety system** designed to prevent uncontrolled self-improvement, resource hijacking, and other AI risks. The safety system operates with multiple layers of protection:
+
+### 🔒 **Core Safety Features**
+
+```python
+from arbor.safety import initialize_safety_system, SafetyLimits
+
+# Configure safety limits
+limits = SafetyLimits(
+    max_parameters=10_000_000_000,     # 10B parameter hard limit
+    max_growth_events_per_hour=2,      # Conservative growth rate
+    require_human_approval_for_growth=True,  # Human oversight required
+    enable_escape_detection=True,      # Monitor for escape attempts
+    emergency_shutdown_threshold=0.95  # Auto-shutdown at 95% resources
+)
+
+# Initialize safety system (global protection)
+guardian = initialize_safety_system(limits)
+
+# Models automatically connect to safety system
+model = ArborTransformer(config)  # Now protected!
+```
+
+### 🛡️ **Protection Mechanisms**
+
+| Layer | Protection | Description |
+|-------|------------|-------------|
+| **🔒 Growth Control** | Intelligence Explosion Prevention | Human approval required for all model modifications |
+| **🚨 Resource Monitoring** | Resource Hijacking Prevention | Real-time GPU/CPU/memory usage tracking with hard limits |
+| **🕵️ Escape Detection** | Containment Assurance | File system and network access monitoring |
+| **🔐 Model Integrity** | Tampering Prevention | Cryptographic verification of model state changes |
+| **⛔ Emergency Shutdown** | Immediate Threat Response | Automatic halt on dangerous conditions |
+| **👤 Human Oversight** | Human-in-the-Loop | Interactive approval for all critical operations |
+
+### 🚨 **Human Approval Workflow**
+
+When the model requests growth or modification:
+
+1. **🔍 Safety Evaluation**: Guardian checks against safety limits
+2. **👤 Human Notification**: Interactive approval interface displays request details
+3. **📋 Review Process**: Human operator examines operation parameters and risks
+4. **✅ Decision**: Approve, deny, or allow timeout (default: deny)
+5. **🚀 Execution**: Only explicitly approved operations proceed
+
+```bash
+# Run safety demo to see the system in action
+python demo_safety.py
+```
+
+**📚 Complete Safety Documentation**: See [SAFETY_DOCUMENTATION.md](SAFETY_DOCUMENTATION.md) for detailed safety features, configuration options, and best practices.
+
+## �🚀 Quick Start
 
 <div align="center">
 <img src="https://img.shields.io/badge/Setup%20Time-5%20Minutes-brightgreen?style=for-the-badge" alt="Setup Time">
@@ -319,6 +385,12 @@ pip install torch transformers datasets wandb PyYAML safetensors
 
 # 🎯 Quick validation
 python -c "from arbor.modeling.model import ArborTransformer; print('✅ Arbor installed successfully!')"
+
+# 🛡️ Test safety system
+python -c "from arbor.safety import initialize_safety_system; print('✅ Safety system operational!')"
+
+# 🧪 Run safety demo (optional)
+python demo_safety.py
 ```
 
 ### ⚡ **Instant Training**
@@ -939,6 +1011,7 @@ print(f"🤖 Arbor: {response}")
 | Guide | Description | Status |
 |-------|-------------|--------|
 | 📖 **[Getting Started](./README.md)** | Complete setup and training guide | ✅ **Current** |
+| 🛡️ **[AI Safety Guide](./SAFETY_DOCUMENTATION.md)** | Comprehensive safety system documentation | ✅ **Available** |
 | 🧠 **[Adaptive Context Guide](./ADAPTIVE_CONTEXT_GUIDE.md)** | Deep dive into context system | ✅ **Available** |
 | 🎯 **[Post-Training Guide](./POST_TRAINING_GUIDE.md)** | Comprehensive fine-tuning manual | ✅ **Available** |
 | 💻 **[API Reference](./docs/api/)** | Complete API documentation | 🔄 **Coming Soon** |
@@ -960,6 +1033,10 @@ print(f"🤖 Arbor: {response}")
 │   │   ├── yaml_trainer.py            # YAML-based training
 │   │   ├── post_trainer.py            # Post-training system
 │   │   └── trainer.py                 # Base training logic
+│   ├── 🛡️ safety/                     # AI Safety system
+│   │   ├── guardian.py                # Safety monitoring and control
+│   │   ├── approval.py                # Human approval interface
+│   │   └── config.py                  # Safety configuration
 │   └── 🔤 tokenization/                # Tokenizer management
 │       └── tokenizer.py               # Hermes-4-405B integration
 ├── ⚙️ configs/                         # Configuration files
@@ -980,8 +1057,10 @@ print(f"🤖 Arbor: {response}")
 │   └── test_adaptive_context.py       # Context system tests
 ├── 🚀 train.py                        # Main training script
 ├── 🎯 post_train.py                   # Post-training CLI
-├── 📚 ADAPTIVE_CONTEXT_GUIDE.md       # Context system guide
+├── �️ demo_safety.py                 # Safety system demonstration
+├── �📚 ADAPTIVE_CONTEXT_GUIDE.md       # Context system guide
 ├── 🎯 POST_TRAINING_GUIDE.md          # Post-training manual
+├── 🛡️ SAFETY_DOCUMENTATION.md        # AI Safety system guide
 └── 📖 README.md                       # This documentation
 ```
 

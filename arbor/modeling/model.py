@@ -13,6 +13,14 @@ from dataclasses import dataclass
 from .layers import ExpandableEmbedding, count_parameters
 from .block import ArborBlock, PositionalEncoding
 
+# Import safety system (deferred to avoid circular imports)
+def _get_safety_guardian():
+    try:
+        from ..safety import get_safety_guardian
+        return get_safety_guardian()
+    except ImportError:
+        return None
+
 
 @dataclass
 class ArborConfig:
@@ -164,6 +172,13 @@ class ArborTransformer(nn.Module):
         
         # Track growth events
         self.growth_history: List[Dict[str, Any]] = []
+        
+        # 🛡️ Initialize safety monitoring
+        self.safety_guardian = _get_safety_guardian()
+        if self.safety_guardian:
+            print("🛡️ Arbor model connected to Safety Guardian")
+        else:
+            print("⚠️ Safety Guardian not available - operating without safety monitoring")
     
     def _init_weights(self, module: nn.Module) -> None:
         """Initialize model weights."""
@@ -198,6 +213,17 @@ class ArborTransformer(nn.Module):
             If return_dict=False: Just the logits tensor
         """
         batch_size, seq_len = input_ids.shape
+        
+        # 🛡️ SAFETY CHECK: Monitor for suspicious behavior during inference
+        if self.safety_guardian and not self.training:
+            # Check for potential escape attempts (unusual input patterns)
+            if seq_len > 8192:  # Unusually long input
+                print(f"⚠️ Safety Alert: Unusually long input detected ({seq_len} tokens)")
+            
+            # Monitor for repeated patterns that might indicate manipulation attempts
+            unique_tokens = len(torch.unique(input_ids))
+            if unique_tokens < seq_len * 0.1:  # Less than 10% unique tokens
+                print(f"⚠️ Safety Alert: Low token diversity detected ({unique_tokens}/{seq_len})")
         
         # Adaptive context window decision
         context_decision = None
@@ -256,7 +282,7 @@ class ArborTransformer(nn.Module):
             )
         
         # Auto-grow layers if needed during training
-        if self.training and self.config.enable_layer_growth:
+        if self.training and self.config.layer_growth_enabled:
             self.auto_grow_if_needed()
             
         if return_dict:

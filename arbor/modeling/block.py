@@ -87,11 +87,22 @@ class ArborBlock(nn.Module):
         # Handle causal attention
         use_causal = is_causal if is_causal is not None else self.causal
         
-        attn_output, _ = self.self_attn(
-            x, x, x,
-            attn_mask=attention_mask,
-            is_causal=use_causal and attention_mask is None,
-        )
+        # Create causal mask if needed and none provided
+        if use_causal and attention_mask is None:
+            seq_len = x.size(1)
+            causal_mask = torch.triu(torch.full((seq_len, seq_len), float('-inf')), diagonal=1)
+            causal_mask = causal_mask.to(x.device)
+            attn_output, _ = self.self_attn(
+                x, x, x,
+                attn_mask=causal_mask,
+                is_causal=False,  # We're providing the mask explicitly
+            )
+        else:
+            attn_output, _ = self.self_attn(
+                x, x, x,
+                attn_mask=attention_mask,
+                is_causal=False,  # Don't use is_causal when mask is provided
+            )
         
         x = residual + self.dropout(attn_output)
         

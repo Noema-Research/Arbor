@@ -1,11 +1,15 @@
 ## 📚 Documentation Index
 
+### 🛡️ **AI Safety & Security** (Critical)
+- [`SAFETY_DOCUMENTATION.md`](SAFETY_DOCUMENTATION.md) - **Complete AI safety system guide**
+- [`arbor/safety/`](arbor/safety/) - AI safety module with guardian, approval, and config
+- [`demo_safety.py`](demo_safety.py) - Interactive safety system demonstration
+- [`arbor/safety/guardian.py`](arbor/safety/guardian.py) - Core safety monitoring and control
+- [`arbor/safety/approval.py`](arbor/safety/approval.py) - Human approval interface
+- [`arbor/safety/config.py`](arbor/safety/config.py) - Safety limits and configuration
+
 ### 🏗️ **Architecture & Implementation**
--| 🚀 **Quick Start** | [`README.md`](README.md#-quick-start) |
-| 📚 **Complete Documentation** | [`DOCUMENTATION.md`](DOCUMENTATION.md) |
-| 🤖 **Agentic AI Guide** | [`AGENTIC_AI_GUIDE.md`](AGENTIC_AI_GUIDE.md) |
-| 🤖 **Agentic AI Examples** | [`examples/agent_usage.py`](examples/agent_usage.py) |
-| 🏗️ **Layer Growth Demo** | [`examples/layer_growth_demo.py`](examples/layer_growth_demo.py) |README.md`](README.md) - Main documentation with architecture overview
+- [`README.md`](README.md) - Main documentation with architecture overview
 - [`DOCUMENTATION.md`](DOCUMENTATION.md) - Complete technical documentation
 - [`SCALING_GUIDE.md`](SCALING_GUIDE.md) - Complete scaling methodology (799M → 400B)
 - [`LAYER_GROWTH_IMPLEMENTATION.md`](LAYER_GROWTH_IMPLEMENTATION.md) - Dynamic layer growth (24→64 layers)
