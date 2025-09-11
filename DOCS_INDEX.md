@@ -10,6 +10,11 @@
 - [`deploy.sh`](deploy.sh) - One-command deployment automation script
 - [`scripts/enterprise_deploy.py`](scripts/enterprise_deploy.py) - Enterprise deployment CLI
 
+### 🎭 **Multimodal Extensions**
+- [`MULTIMODAL_ROADMAP.md`](MULTIMODAL_ROADMAP.md) - Vision, audio, video architecture plans
+- [`arbor/modeling/multimodal.py`](arbor/modeling/multimodal.py) - Multimodal model architecture
+- [`configs/multimodal_training_config.yaml`](configs/multimodal_training_config.yaml) - Multimodal training config
+
 ### 🔧 **Core Implementation Files**
 
 #### Enterprise Architecture (200B-400B Parameters)
@@ -45,10 +50,12 @@
 |-------------------|-------------|
 | 🚀 **Quick Start** | [`README.md`](README.md#-quick-start) |
 | 🏢 **Enterprise Deployment** | [`ENTERPRISE_DEPLOYMENT.md`](ENTERPRISE_DEPLOYMENT.md) |
+| 🎭 **Multimodal AI** | [`MULTIMODAL_ROADMAP.md`](MULTIMODAL_ROADMAP.md) |
 | 📈 **Scaling to 200B-400B** | [`SCALING_GUIDE.md`](SCALING_GUIDE.md) |
 | ✅ **Implementation Status** | [`DEPLOYMENT_COMPLETE.md`](DEPLOYMENT_COMPLETE.md) |
 | 🔧 **Training Configuration** | [`configs/training_config.yaml`](configs/training_config.yaml) |
 | 🎛️ **Enterprise Config** | [`configs/arbor_enterprise_scale.yaml`](configs/arbor_enterprise_scale.yaml) |
+| 🎭 **Multimodal Config** | [`configs/multimodal_training_config.yaml`](configs/multimodal_training_config.yaml) |
 | 🤖 **Model Architecture** | [`arbor/modeling/`](arbor/modeling/) |
 | 🎯 **Training System** | [`arbor/train/`](arbor/train/) |
 | 🌐 **Deployment Scripts** | [`scripts/enterprise_deploy.py`](scripts/enterprise_deploy.py) |

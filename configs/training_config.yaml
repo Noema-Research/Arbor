@@ -1,5 +1,5 @@
 # Arbor Training Configuration
-# Complete YAML configuration for training Arbor models
+# Complete YAML configuration for training Arbor models with optional multimodal support
 
 # Model Configuration
 model:
@@ -32,8 +32,54 @@ model:
     latency_threshold: 2.0
     cooldown_steps: 100
 
+# Multimodal Configuration (Optional - disabled by default)
+multimodal:
+  # Enable specific modalities
+  enabled: false                     # Set to true to enable multimodal training
+  enable_vision: false               # Enable image processing
+  enable_audio: false                # Enable audio processing  
+  enable_video: false                # Enable video processing
+  
+  # Vision Configuration
+  vision:
+    encoder: "clip"                  # Options: "clip", "eva", "siglip"
+    image_size: 224
+    patch_size: 16
+    layers: 12                       # Separate from main model layers
+    embed_dim: 768                   # Will be projected to model.hidden_size
+    tokens_per_image: 256
+    
+  # Audio Configuration
+  audio:
+    encoder: "whisper"               # Options: "whisper", "wav2vec2"
+    sample_rate: 16000
+    chunk_length: 30                 # seconds
+    layers: 6
+    embed_dim: 512
+    tokens_per_second: 50
+    
+  # Video Configuration  
+  video:
+    encoder: "videomae"              # Options: "videomae", "timesformer"
+    frames: 16
+    fps: 8
+    layers: 6
+    embed_dim: 512
+    tokens_per_frame: 64
+    
+  # Cross-Modal Fusion
+  fusion:
+    method: "attention"              # Options: "attention", "concat", "perceiver"
+    layers: 4
+    dropout: 0.1
+    
+  # Training weights
+  multimodal_loss_weight: 1.0
+  contrastive_loss_weight: 0.1
+
 # Dataset Configuration
 datasets:
+  # Text-only datasets (default)
   - name: "tinystories"
     source: "roneneldan/TinyStories"
     split: "train[:5000]"
@@ -53,6 +99,29 @@ datasets:
       prefix: "<|text|>"
       suffix: "<|/text|>"
       max_length: 1024
+  
+  # Multimodal datasets (only used when multimodal.enabled = true)
+  - name: "vision_language"
+    source: "HuggingFaceM4/COCO"
+    split: "train[:1000]"
+    text_column: "caption"
+    image_column: "image"
+    enabled_when: "multimodal.enable_vision"
+    preprocessing:
+      prefix: "<|image|>"
+      suffix: "<|/image|>"
+      max_length: 512
+      
+  - name: "audio_language" 
+    source: "librispeech_asr"
+    split: "train[:500]"
+    text_column: "text"
+    audio_column: "audio"
+    enabled_when: "multimodal.enable_audio"
+    preprocessing:
+      prefix: "<|audio|>"
+      suffix: "<|/audio|>"
+      max_length: 256
       
   - name: "python_code"
     source: "codeparrot/github-code"
@@ -69,6 +138,19 @@ datasets:
 # Always downloads fresh Hermes-4-405B tokenizer to ensure latest version
 tokenizer:
   # No configuration needed - always uses fresh Hermes-4-405B
+  name: "hermes-4-405b"
+  vocab_size: 128000
+  auto_download: true
+  
+  # Multimodal special tokens (added when multimodal training enabled)
+  multimodal_tokens:
+    image_start: "<|image_start|>"
+    image_end: "<|image_end|>"
+    audio_start: "<|audio_start|>"
+    audio_end: "<|audio_end|>"
+    video_start: "<|video_start|>"
+    video_end: "<|video_end|>"
+    modality_sep: "<|modality_sep|>"
 
 # Training Configuration
 training:
@@ -81,8 +163,8 @@ training:
   steps_per_dataset: 500  # Steps per dataset
   
   # Batch Configuration
-  per_device_train_batch_size: 4
-  gradient_accumulation_steps: 2
+  per_device_train_batch_size: 4      # Reduce to 2 when multimodal.enabled = true
+  gradient_accumulation_steps: 2      # Increase to 4 when multimodal.enabled = true
   dataloader_drop_last: true
   
   # Evaluation
@@ -93,7 +175,7 @@ training:
   
   # Memory & Performance
   gradient_checkpointing: true
-  fp16: true
+  fp16: true                          # Switch to bf16 when multimodal.enabled = true
   dataloader_num_workers: 4
   
   # Growth Monitoring
@@ -101,6 +183,13 @@ training:
     enabled: true
     patience: 50
     min_improvement: 0.01
+    
+  # Multimodal Training Settings (only used when multimodal.enabled = true)
+  multimodal_training:
+    text_only_ratio: 0.7              # 70% text-only, 30% multimodal data
+    modality_dropout: 0.1             # Randomly drop modalities during training
+    adaptive_batch_size: true         # Adjust batch size based on modalities
+    contrastive_temperature: 0.07     # Temperature for contrastive learning
 
 # Logging & Monitoring
 logging:
@@ -159,9 +248,22 @@ post_training:
 # Hardware Configuration
 hardware:
   device: "auto"  # auto, cpu, cuda, mps
-  mixed_precision: "fp16"
+  mixed_precision: "fp16"           # Switches to "bf16" when multimodal.enabled = true
   gradient_checkpointing: true
   
   # Memory Management
   max_memory_gb: null  # Auto-detect
   low_memory_mode: false
+  
+  # Multimodal Hardware Settings (when multimodal.enabled = true)
+  multimodal_hardware:
+    vision_encoder_device: "cuda:0"      # Can separate encoders across GPUs
+    audio_encoder_device: "cuda:0"
+    text_model_device: "cuda:0"
+    pin_memory: true
+    non_blocking: true
+
+# Usage Examples:
+# Standard text training:  python train.py configs/training_config.yaml
+# Multimodal training:     python train_multimodal.py configs/training_config.yaml
+# With preset:             python train_multimodal.py configs/training_config.yaml --preset vision_language
