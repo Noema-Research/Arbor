@@ -40,10 +40,20 @@ class ArborConfig:
     # Growth settings
     growth_enabled: bool = True
     
+    # Adaptive context settings
+    adaptive_context: bool = True
+    context_router_layers: int = 3
+    min_context_length: int = 1024
+    max_context_length: int = None  # Will use max_seq_length
+    
     def __post_init__(self):
         """Validate configuration."""
         assert self.dim % self.num_heads == 0, "dim must be divisible by num_heads"
         assert self.activation in ["gelu", "relu", "swish"], f"Unsupported activation: {self.activation}"
+        
+        # Set max context length if not specified
+        if self.max_context_length is None:
+            self.max_context_length = self.max_seq_length
 
 
 class ArborTransformer(nn.Module):
@@ -87,6 +97,27 @@ class ArborTransformer(nn.Module):
             )
             for _ in range(config.num_layers)
         ])
+        
+        # Adaptive context system
+        if config.adaptive_context:
+            from .adaptive_context import AdaptiveContextManager, AdaptiveContextConfig
+            
+            adaptive_config = AdaptiveContextConfig(
+                vocab_size=config.vocab_size,
+                max_seq_length=config.max_seq_length,
+                router_max_length=512,  # Fast analysis
+                min_context=config.min_context_length,
+                max_context=config.max_context_length,
+                growth_enabled=config.growth_enabled
+            )
+            
+            self.context_manager = AdaptiveContextManager(adaptive_config)
+            self.current_context_length = config.min_context_length
+            print(f"🧠 Adaptive context system initialized")
+            print(f"   Context range: {config.min_context_length:,} - {config.max_context_length:,}")
+        else:
+            self.context_manager = None
+            self.current_context_length = config.max_seq_length
         
         # Final layer norm
         self.final_norm = nn.LayerNorm(config.dim, eps=config.layer_norm_eps)
@@ -140,6 +171,23 @@ class ArborTransformer(nn.Module):
             If return_dict=False: Just the logits tensor
         """
         batch_size, seq_len = input_ids.shape
+        
+        # Adaptive context window decision
+        context_decision = None
+        if self.context_manager is not None and self.training is False:  # Only during inference
+            adapted_length, context_decision = self.context_manager.analyze_and_adapt(input_ids, self)
+            
+            # Truncate input if it exceeds adapted context length
+            if seq_len > adapted_length:
+                input_ids = input_ids[:, -adapted_length:]  # Keep most recent tokens
+                if attention_mask is not None:
+                    attention_mask = attention_mask[:, -adapted_length:]
+                if labels is not None:
+                    labels = labels[:, -adapted_length:]
+                seq_len = adapted_length
+                
+                print(f"🔄 Context adapted: {seq_len} tokens, task: {context_decision.task_type}")
+                print(f"   Reasoning: {context_decision.reasoning}")
         
         # Token embeddings
         x = self.token_embedding(input_ids)
@@ -319,6 +367,63 @@ class ArborTransformer(nn.Module):
                 input_ids = torch.cat([input_ids, next_token], dim=1)
         
         return input_ids
+    
+    def resize_position_embeddings(self, new_length: int):
+        """Dynamically resize position embeddings for new context length."""
+        if new_length == self.current_context_length:
+            return
+        
+        print(f"🔄 Resizing position embeddings: {self.current_context_length} → {new_length}")
+        
+        # Resize positional encoding
+        if hasattr(self.pos_encoding, 'resize'):
+            self.pos_encoding.resize(new_length)
+        
+        self.current_context_length = new_length
+    
+    def set_max_position_embeddings(self, max_length: int):
+        """Set maximum position embeddings for attention computation."""
+        self.config.max_seq_length = max_length
+        
+        # Update each layer's attention mechanism
+        for layer in self.layers:
+            if hasattr(layer.attention, 'set_max_length'):
+                layer.attention.set_max_length(max_length)
+    
+    def clear_attention_cache(self):
+        """Clear attention caches when context length changes."""
+        for layer in self.layers:
+            if hasattr(layer.attention, 'clear_cache'):
+                layer.attention.clear_cache()
+    
+    def get_context_info(self) -> Dict[str, any]:
+        """Get information about current context configuration."""
+        info = {
+            "current_context_length": self.current_context_length,
+            "max_context_length": self.config.max_context_length,
+            "min_context_length": self.config.min_context_length,
+            "adaptive_context_enabled": self.context_manager is not None,
+        }
+        
+        if self.context_manager is not None:
+            info.update({
+                "context_router_active": True,
+                "available_context_lengths": self.context_manager.config.context_lengths,
+                "supported_task_types": self.context_manager.config.task_types,
+            })
+        
+        return info
+    
+    def force_context_length(self, length: int):
+        """Force a specific context length (bypass adaptive system)."""
+        if length not in self.context_manager.config.context_lengths:
+            print(f"⚠️  Warning: {length} not in supported lengths {self.context_manager.config.context_lengths}")
+        
+        self.resize_position_embeddings(length)
+        self.set_max_position_embeddings(length)
+        self.clear_attention_cache()
+        
+        print(f"🔧 Forced context length to {length:,} tokens")
 
 
 def create_arbor_model(

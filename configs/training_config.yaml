@@ -1,0 +1,167 @@
+# Arbor Training Configuration
+# Complete YAML configuration for training Arbor models
+
+# Model Configuration
+model:
+  name: "arbor-500m-1b"
+  architecture: "arbor"
+  vocab_size: 128000
+  hidden_size: 1024
+  num_layers: 24
+  num_heads: 16
+  intermediate_size: 4096
+  max_position_embeddings: 131072
+  
+  # Growth Settings
+  growth:
+    enabled: true
+    factor: 2.0
+    max_steps: 8
+    threshold: 0.95
+  
+  # Adaptive Context Settings
+  adaptive_context:
+    enabled: true
+    min_context_length: 1024
+    max_context_length: 131072
+    context_router_layers: 3
+    task_types: ["chat", "code", "reasoning", "document", "creative", "qa", "summarization", "translation"]
+    context_lengths: [1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072]
+    hardware_aware: true
+    memory_threshold: 0.85
+    latency_threshold: 2.0
+    cooldown_steps: 100
+
+# Dataset Configuration
+datasets:
+  - name: "tinystories"
+    source: "roneneldan/TinyStories"
+    split: "train[:5000]"
+    text_column: "text"
+    preprocessing:
+      prefix: "<|story|>"
+      suffix: "<|/story|>"
+      max_length: 1024
+    
+  - name: "webtext"
+    source: "openwebtext"
+    split: "train[:2000]"
+    text_column: "text"
+    fallback_dataset: "wikitext"
+    fallback_config: "wikitext-2-raw-v1"
+    preprocessing:
+      prefix: "<|text|>"
+      suffix: "<|/text|>"
+      max_length: 1024
+      
+  - name: "python_code"
+    source: "codeparrot/github-code"
+    split: "train[:1000]"
+    text_column: "code"
+    filters:
+      languages: ["Python"]
+    preprocessing:
+      prefix: "<|code|>"
+      suffix: "<|/code|>"
+      max_length: 1024
+
+# Tokenizer Configuration
+# Always downloads fresh Hermes-4-405B tokenizer to ensure latest version
+tokenizer:
+  # No configuration needed - always uses fresh Hermes-4-405B
+
+# Training Configuration
+training:
+  output_dir: "./arbor-training-output"
+  
+  # Training Hyperparameters
+  learning_rate: 2e-5
+  warmup_steps: 100
+  max_steps: 1500  # Total steps across all datasets
+  steps_per_dataset: 500  # Steps per dataset
+  
+  # Batch Configuration
+  per_device_train_batch_size: 4
+  gradient_accumulation_steps: 2
+  dataloader_drop_last: true
+  
+  # Evaluation
+  eval_steps: 50
+  eval_strategy: "steps"
+  save_steps: 100
+  logging_steps: 20
+  
+  # Memory & Performance
+  gradient_checkpointing: true
+  fp16: true
+  dataloader_num_workers: 4
+  
+  # Growth Monitoring
+  growth_monitoring:
+    enabled: true
+    patience: 50
+    min_improvement: 0.01
+
+# Logging & Monitoring
+logging:
+  wandb:
+    enabled: true
+    project: "arbor-dynamic-growth"
+    entity: null  # Set your wandb entity/username
+    tags: ["arbor", "dynamic-growth", "transformer"]
+    notes: "Training Arbor model with dynamic growth on multiple datasets"
+  
+  local:
+    log_level: "INFO"
+    save_logs: true
+    log_file: "./training.log"
+
+# HuggingFace Integration
+huggingface:
+  # Authentication
+  token: "${HF_TOKEN}"  # Environment variable or set directly
+  
+  # Model Upload
+  upload:
+    enabled: true
+    repository: "your-username/arbor-500m-1b-trained"
+    private: false
+    create_model_card: true
+    commit_message: "🌱 Trained Arbor model with dynamic growth"
+    
+  # Model Card Configuration
+  model_card:
+    license: "mit"
+    language: "en"
+    tags: ["arbor", "dynamic-growth", "pytorch", "transformers"]
+    datasets: ["tinystories", "openwebtext", "python-code"]
+
+# Post-Training Configuration (optional)
+post_training:
+  enabled: false                    # Set to true to run post-training immediately
+  type: "fine_tune"                # "fine_tune", "instruct", "domain_adapt"
+  datasets:
+    - name: "high_quality"
+      source: "HuggingFaceFW/fineweb-edu"
+      split: "train[:500]"
+      text_column: "text"
+      max_length: 2048
+  learning_rate: 5e-6              # Lower LR for post-training
+  max_steps: 300                   # Fewer steps
+  batch_size: 4
+  lora_enabled: true
+  lora_rank: 8
+  freeze_layers: [0, 1, 2, 3]      # Freeze early layers
+  output_dir: "./post_training_auto"
+  push_to_hub: false
+  hub_model_id: "your-username/arbor-post-trained"
+
+# Hardware Configuration
+hardware:
+  device: "auto"  # auto, cpu, cuda, mps
+  mixed_precision: "fp16"
+  gradient_checkpointing: true
+  
+  # Memory Management
+  max_memory_gb: null  # Auto-detect
+  low_memory_mode: false

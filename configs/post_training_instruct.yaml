@@ -1,0 +1,82 @@
+# Post-Training Configuration: Instruction Tuning
+# Use this config to turn a base model into an instruction-following assistant
+
+# Model Source Configuration
+model_source: "huggingface"
+model_path: "your-username/your-arbor-model"
+
+# Post-Training Type
+training_type: "instruct"
+
+# Instruction Datasets
+datasets:
+  - name: "alpaca"
+    source: "tatsu-lab/alpaca"
+    split: "train[:5000]"
+    max_length: 2048
+    # This dataset has instruction/input/output format
+    
+  - name: "dolly"
+    source: "databricks/databricks-dolly-15k"
+    split: "train[:3000]"
+    max_length: 2048
+    # Another instruction dataset
+    
+  - name: "oasst"
+    source: "OpenAssistant/oasst1"
+    split: "train[:2000]"
+    text_column: "text"
+    max_length: 3072
+
+# Training Parameters (instruction tuning specific)
+learning_rate: 2e-5        # Slightly higher for instruction tuning
+warmup_steps: 200
+max_steps: 2000            # More steps for instruction learning
+per_device_batch_size: 2   # Smaller batch for longer sequences
+gradient_accumulation_steps: 8
+eval_steps: 200
+save_steps: 400
+
+# LoRA Configuration (higher rank for instructions)
+lora_enabled: true
+lora_rank: 32              # Higher rank for instruction following
+target_modules:
+  - "q_proj"
+  - "v_proj"
+  - "o_proj"
+  - "gate_proj"
+  - "up_proj"
+  - "down_proj"
+  - "embed_tokens"         # Include embeddings for instruction tuning
+  - "lm_head"             # Include output head
+
+# Layer Freezing Strategy
+freeze_layers: []          # Don't freeze layers for instruction tuning
+
+# Context Settings (instructions can be longer)
+adaptive_context_enabled: true
+context_adaptation_strength: 0.9  # More aggressive adaptation
+
+# Growth Settings
+growth_enabled: false     # Typically disabled for instruction tuning
+growth_threshold: 0.99
+
+# Output Settings
+output_dir: "./post_training_instruct"
+save_merged_model: true
+push_to_hub: false
+hub_model_id: "your-username/arbor-instruct"
+
+# Logging
+logging:
+  wandb:
+    enabled: true          # Enable for instruction tuning monitoring
+    project: "arbor-instruction-tuning"
+    tags: ["instruct", "arbor", "assistant"]
+  console:
+    enabled: true
+    level: "INFO"
+
+# Instruction-specific settings
+instruction_format: "alpaca"  # Format style for instructions
+system_message: "You are a helpful AI assistant. Follow the instructions carefully and provide accurate, helpful responses."

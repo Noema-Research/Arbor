@@ -1,0 +1,102 @@
+# Example training configuration for Arbor models
+# Copy this file and customize for your needs
+
+model:
+  vocab_size: 128000              # Hermes tokenizer vocabulary size
+  hidden_size: 1024               # Model dimension
+  num_layers: 24                  # Number of transformer layers
+  num_heads: 16                   # Number of attention heads
+  intermediate_size: 4096         # FFN dimension (before growth)
+  max_position_embeddings: 131072 # Maximum context length (128K)
+  
+  growth:
+    enabled: true                 # Enable dynamic growth
+    factor: 2.0                   # Growth multiplier (2x FFN size)
+    max_steps: 8                  # Maximum growth events
+    threshold: 0.95               # Capacity utilization threshold
+
+datasets:
+  # TinyStories - Simple training data
+  - name: "stories"
+    source: "roneneldan/TinyStories"
+    split: "train"
+    text_column: "text"
+    preprocessing:
+      prefix: "Once upon a time"
+      suffix: ""
+      max_length: 1024
+  
+  # OpenWebText - Web text data
+  - name: "web_text"
+    source: "openwebtext"
+    split: "train"
+    text_column: "text"
+    fallback_dataset: "Skylion007/openwebtext"
+    preprocessing:
+      prefix: ""
+      suffix: ""
+      max_length: 2048
+  
+  # Python code training
+  - name: "python_code"
+    source: "github-code"
+    split: "train"
+    text_column: "code"
+    fallback_dataset: "codeparrot/github-code-clean"
+    fallback_config: "python"
+    filters:
+      languages: ["Python"]
+      licenses: ["mit", "apache-2.0"]
+    preprocessing:
+      prefix: "# Python code:"
+      suffix: ""
+      max_length: 4096
+
+tokenizer:
+  # Always downloads fresh Hermes-4-405B tokenizer
+  # No configuration needed - ensures latest version
+
+training:
+  output_dir: "./trained_models"           # Where to save models
+  learning_rate: 2e-5                     # Learning rate
+  warmup_steps: 100                       # Warmup steps
+  steps_per_dataset: 500                  # Training steps per dataset
+  per_device_train_batch_size: 4          # Batch size per GPU
+  gradient_accumulation_steps: 2          # Gradient accumulation
+  eval_steps: 50                          # Evaluation frequency
+  save_steps: 100                         # Model save frequency
+  logging_steps: 20                       # Logging frequency
+  fp16: true                              # Mixed precision
+  gradient_checkpointing: true            # Memory optimization
+  dataloader_drop_last: true              # Drop incomplete batches
+  eval_strategy: "steps"                  # Evaluation strategy
+
+hardware:
+  devices: "auto"                         # Auto-detect GPUs
+  mixed_precision: true                   # Enable mixed precision
+  distributed: false                      # Multi-GPU training
+
+logging:
+  wandb:
+    enabled: false                        # Enable WandB logging
+    project: "arbor-experiments"          # WandB project name
+    entity: ""                            # WandB entity (username/org)
+    tags: ["arbor", "dynamic-growth"]     # Tags for runs
+    notes: "Arbor dynamic growth training" # Run description
+  
+  console:
+    enabled: true                         # Console logging
+    level: "INFO"                         # Log level
+
+huggingface:
+  upload:
+    enabled: false                        # Upload to HF Hub
+    repository: "your-username/arbor-trained" # HF repository
+    token: "${HF_TOKEN}"                  # HF token (env variable)
+    private: false                        # Private repository
+    create_repo: true                     # Create repo if it doesn't exist
+  
+  model_card:
+    enabled: true                         # Generate model card
+    title: "Arbor Dynamic Growth Model"   # Model card title
+    description: "A transformer with dynamic growth capabilities" # Description

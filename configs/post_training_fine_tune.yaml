@@ -1,0 +1,70 @@
+# Post-Training Configuration: Fine-Tuning
+# Use this config to fine-tune a base Arbor model on domain-specific data
+
+# Model Source Configuration
+model_source: "huggingface"  # Options: "local", "huggingface", "checkpoint"
+model_path: "your-username/your-arbor-model"  # HF model ID or local path
+
+# Post-Training Type
+training_type: "fine_tune"  # Options: "fine_tune", "instruct", "rlhf", "domain_adapt"
+
+# Datasets for Post-Training
+datasets:
+  - name: "stories"
+    source: "roneneldan/TinyStories"
+    split: "train[:5000]"  # Small subset for fine-tuning
+    text_column: "text"
+    max_length: 1024
+    
+  - name: "wiki"
+    source: "wikitext"
+    split: "train[:2000]"
+    text_column: "text"
+    max_length: 2048
+
+# Training Parameters (optimized for post-training)
+learning_rate: 1e-5        # Lower learning rate for fine-tuning
+warmup_steps: 100
+max_steps: 1000            # Fewer steps than main training
+per_device_batch_size: 4
+gradient_accumulation_steps: 2
+eval_steps: 100
+save_steps: 200
+
+# Efficient Fine-Tuning with LoRA
+lora_enabled: true         # Use LoRA for memory efficiency
+lora_rank: 16             # LoRA rank (16-64 typical)
+target_modules:           # Which modules to apply LoRA to
+  - "q_proj"
+  - "v_proj" 
+  - "o_proj"
+  - "gate_proj"
+  - "up_proj"
+  - "down_proj"
+
+# Layer Freezing (optional)
+freeze_layers: []          # Freeze specific layers: [0, 1, 2] freezes first 3 layers
+
+# Adaptive Context Settings
+adaptive_context_enabled: true
+context_adaptation_strength: 0.8  # How aggressively to adapt context
+
+# Growth Settings (usually disabled for post-training)
+growth_enabled: false
+growth_threshold: 0.98
+
+# Output Settings
+output_dir: "./post_training_fine_tune"
+save_merged_model: true    # Save full model (not just LoRA adapters)
+push_to_hub: false
+hub_model_id: "your-username/arbor-fine-tuned"
+
+# Logging
+logging:
+  wandb:
+    enabled: false
+    project: "arbor-post-training"
+    tags: ["fine-tune", "arbor"]
+  console:
+    enabled: true
+    level: "INFO"

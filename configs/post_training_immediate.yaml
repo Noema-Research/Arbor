@@ -1,0 +1,78 @@
+# Post-Training Configuration: Immediate Post-Training
+# Use this config to continue training immediately after main training finishes
+
+# Model Source Configuration
+model_source: "local"      # Use local model from main training
+model_path: "./arbor-training-output/final_model"  # Path to trained model
+
+# Post-Training Type
+training_type: "fine_tune"
+
+# Specialized Datasets for Post-Training
+datasets:
+  - name: "high_quality"
+    source: "HuggingFaceFW/fineweb-edu"
+    split: "train[:1000]"
+    text_column: "text"
+    max_length: 4096
+    preprocessing:
+      filter_quality: true
+      min_length: 500
+      
+  - name: "reasoning"
+    source: "microsoft/orca-math-word-problems-200k"
+    split: "train[:2000]"
+    text_column: "question"
+    max_length: 2048
+    preprocessing:
+      prefix: "Problem: "
+      suffix: "\nSolution:"
+
+# Training Parameters (immediate post-training)
+learning_rate: 5e-6        # Very low LR to avoid forgetting
+warmup_steps: 50
+max_steps: 500             # Short post-training
+per_device_batch_size: 8
+gradient_accumulation_steps: 1
+eval_steps: 50
+save_steps: 100
+
+# Conservative LoRA Settings
+lora_enabled: true
+lora_rank: 8               # Lower rank for fine adjustments
+target_modules:
+  - "q_proj"
+  - "v_proj"
+  - "o_proj"
+
+# Freeze Most Layers (preserve main training)
+freeze_layers: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]  # Freeze first 12 layers
+
+# Context Settings
+adaptive_context_enabled: true
+context_adaptation_strength: 0.5  # Conservative adaptation
+
+# Growth Settings (continue growth from main training)
+growth_enabled: true
+growth_threshold: 0.95
+
+# Output Settings
+output_dir: "./post_training_immediate"
+save_merged_model: true
+push_to_hub: true          # Push the post-trained model
+hub_model_id: "your-username/arbor-post-trained"
+
+# Logging
+logging:
+  wandb:
+    enabled: true
+    project: "arbor-post-training"
+    tags: ["immediate", "post-train", "specialized"]
+  console:
+    enabled: true
+    level: "INFO"
+
+# Immediate post-training settings
+preserve_main_training: true      # Don't overwrite main capabilities
+validation_on_original: true      # Test on original data to avoid forgetting
+early_stopping_patience: 3        # Stop if performance degrades
