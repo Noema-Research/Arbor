@@ -70,21 +70,173 @@
 
 ### 🎪 **Revolutionary Architecture**
 
+<div align="center">
+
 ```mermaid
-graph TD
-    A[Input Text] --> B[Task Complexity Router]
-    B --> C{Analyze Task}
-    C -->|Simple Chat| D[2K Context]
-    C -->|Code Generation| E[8K Context] 
-    C -->|Document Analysis| F[32K Context]
-    C -->|Large Documents| G[131K Context]
-    D --> H[Arbor Transformer]
-    E --> H
-    F --> H
-    G --> H
-    H --> I[Dynamic FFN Growth]
-    I --> J[Generated Output]
+graph TB
+    subgraph "📥 Input Processing"
+        A[Input Text] --> B[Tokenization<br/>Hermes-4-405B]
+        B --> C[Initial Analysis<br/>First 256 tokens]
+    end
+    
+    subgraph "🧠 Task Complexity Router"
+        C --> D[Router Embeddings<br/>256-dim]
+        D --> E[3-Layer Transformer<br/>Lightweight & Fast]
+        E --> F[Multi-Head Classification]
+        F --> G[Task Type<br/>8 categories]
+        F --> H[Complexity Score<br/>0.0 - 1.0]
+        F --> I[Context Recommendation<br/>1K - 131K tokens]
+    end
+    
+    subgraph "🎯 Context Decision Engine"
+        G --> J{Task Analysis}
+        H --> J
+        I --> J
+        J -->|💬 Chat| K[1K - 4K Context]
+        J -->|💻 Code| L[4K - 16K Context]
+        J -->|🧠 Reasoning| M[8K - 32K Context]
+        J -->|📄 Document| N[16K - 131K Context]
+        J -->|🎨 Creative| O[2K - 16K Context]
+        J -->|❓ Q&A| P[1K - 8K Context]
+        J -->|📝 Summary| Q[4K - 32K Context]
+        J -->|🌐 Translation| R[2K - 8K Context]
+    end
+    
+    subgraph "⚡ Hardware Constraint Check"
+        K --> S[Memory Monitor]
+        L --> S
+        M --> S
+        N --> S
+        O --> S
+        P --> S
+        Q --> S
+        R --> S
+        S --> T{GPU Memory<br/>Available?}
+        T -->|✅ Sufficient| U[Apply Recommended Context]
+        T -->|⚠️ Limited| V[Apply Fallback Context<br/>8K tokens]
+    end
+    
+    subgraph "🏗️ Main Arbor Transformer"
+        U --> W[Dynamic Context Adaptation]
+        V --> W
+        W --> X[Positional Embeddings<br/>RoPE/ALiBi]
+        X --> Y[24 Transformer Layers]
+        
+        subgraph "🌱 Dynamic Growth Layer"
+            Y --> Z[Layer Utilization Monitor]
+            Z --> AA{Utilization > 95%?}
+            AA -->|Yes| BB[Expand FFN Layer<br/>2x Growth Factor]
+            AA -->|No| CC[Continue Training]
+            BB --> DD[699M → 799M Parameters]
+            CC --> EE[Maintain Current Size]
+            DD --> FF[Updated Layer]
+            EE --> FF
+        end
+        
+        FF --> GG[Multi-Head Attention<br/>16 heads, 1024-dim]
+        GG --> HH[ExpandableFFN<br/>4096-dim → 8192-dim]
+        HH --> II[Layer Normalization]
+        II --> JJ[Residual Connection]
+    end
+    
+    subgraph "📤 Output Generation"
+        JJ --> KK[Language Model Head<br/>128K vocab]
+        KK --> LL[Softmax Distribution]
+        LL --> MM[Token Sampling<br/>Temperature/Top-p]
+        MM --> NN[Generated Output]
+    end
+    
+    subgraph "🔄 Feedback Loop"
+        NN --> OO[Performance Monitoring]
+        OO --> PP[Context Efficiency Analysis]
+        PP --> QQ[Router Model Updates]
+        QQ --> C
+    end
+    
+    subgraph "💾 Model Management"
+        JJ --> RR[SafeTensors Serialization]
+        RR --> SS[HuggingFace Integration]
+        SS --> TT[Model Hub Upload]
+        TT --> UU[Version Control]
+    end
+
+    classDef inputStyle fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef routerStyle fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef contextStyle fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef transformerStyle fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    classDef outputStyle fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    classDef growthStyle fill:#fff8e1,stroke:#f57f17,stroke-width:2px
+    
+    class A,B,C inputStyle
+    class D,E,F,G,H,I routerStyle
+    class J,K,L,M,N,O,P,Q,R,S,T,U,V contextStyle
+    class W,X,Y,GG,HH,II,JJ,KK,LL,MM,NN transformerStyle
+    class Z,AA,BB,CC,DD,EE,FF growthStyle
+    class OO,PP,QQ,RR,SS,TT,UU outputStyle
 ```
+
+</div>
+
+### 🔬 **Architecture Breakdown**
+
+<details>
+<summary><b>🧠 Task Complexity Router (Click to expand)</b></summary>
+
+**Purpose**: Lightweight 3-layer transformer that analyzes input text to determine optimal processing parameters.
+
+**Components**:
+- **Input Analysis**: Processes first 256 tokens for fast task classification
+- **Multi-Head Classification**: Simultaneously predicts task type, complexity, and context needs
+- **Real-Time Decision**: Sub-millisecond analysis for immediate context adaptation
+
+**Task Categories**:
+- 💬 **Chat**: Conversational interactions (1K-4K context)
+- 💻 **Code**: Programming tasks (4K-16K context)  
+- 🧠 **Reasoning**: Complex analysis (8K-32K context)
+- 📄 **Document**: Long-form processing (16K-131K context)
+- 🎨 **Creative**: Creative writing (2K-16K context)
+- ❓ **Q&A**: Question answering (1K-8K context)
+- 📝 **Summary**: Text summarization (4K-32K context)
+- 🌐 **Translation**: Language translation (2K-8K context)
+
+</details>
+
+<details>
+<summary><b>🌱 Dynamic Growth System (Click to expand)</b></summary>
+
+**Purpose**: Monitors neural network utilization and expands capacity when needed.
+
+**Growth Process**:
+1. **Utilization Monitoring**: Tracks FFN layer activation patterns
+2. **Threshold Detection**: Triggers expansion when utilization > 95%
+3. **Capacity Expansion**: Doubles FFN layer size (4096 → 8192 dimensions)
+4. **Weight Preservation**: Copies existing weights to maintain learned knowledge
+5. **Parameter Tracking**: Monitors growth from 699M → 799M parameters
+
+**Benefits**:
+- **Adaptive Learning**: Model grows as it encounters complex patterns
+- **Efficiency**: Only expands when necessary, not preemptively
+- **Stability**: Preserves existing knowledge during expansion
+
+</details>
+
+<details>
+<summary><b>⚡ Hardware-Aware Optimization (Click to expand)</b></summary>
+
+**Purpose**: Automatically adapts to available computational resources.
+
+**Optimization Features**:
+- **Memory Monitoring**: Real-time GPU memory usage tracking
+- **Context Fallback**: Reduces context length when memory constrained
+- **Batch Size Adaptation**: Adjusts batch sizes based on available memory
+- **Mixed Precision**: Automatic FP16/BF16 selection for optimal performance
+
+**Hardware Scaling**:
+- **8GB VRAM**: Automatic fallback to 8K context maximum
+- **16GB VRAM**: Full context range up to 32K tokens
+- **24GB+ VRAM**: Unrestricted 131K context capability
+
+</details>
 
 ## 🚀 Quick Start
 
