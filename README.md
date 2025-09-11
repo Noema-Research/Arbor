@@ -74,12 +74,12 @@
 
 ```mermaid
 graph TB
-    subgraph "📥 Input Processing"
+    subgraph "Input Processing"
         A[Input Text] --> B[Tokenization<br/>Hermes-4-405B]
         B --> C[Initial Analysis<br/>First 256 tokens]
     end
     
-    subgraph "🧠 Task Complexity Router"
+    subgraph "Task Complexity Router"
         C --> D[Router Embeddings<br/>256-dim]
         D --> E[3-Layer Transformer<br/>Lightweight & Fast]
         E --> F[Multi-Head Classification]
@@ -88,21 +88,21 @@ graph TB
         F --> I[Context Recommendation<br/>1K - 131K tokens]
     end
     
-    subgraph "🎯 Context Decision Engine"
+    subgraph "Context Decision Engine"
         G --> J{Task Analysis}
         H --> J
         I --> J
-        J -->|💬 Chat| K[1K - 4K Context]
-        J -->|💻 Code| L[4K - 16K Context]
-        J -->|🧠 Reasoning| M[8K - 32K Context]
-        J -->|📄 Document| N[16K - 131K Context]
-        J -->|🎨 Creative| O[2K - 16K Context]
-        J -->|❓ Q&A| P[1K - 8K Context]
-        J -->|📝 Summary| Q[4K - 32K Context]
-        J -->|🌐 Translation| R[2K - 8K Context]
+        J -->|Chat| K[1K - 4K Context]
+        J -->|Code| L[4K - 16K Context]
+        J -->|Reasoning| M[8K - 32K Context]
+        J -->|Document| N[16K - 131K Context]
+        J -->|Creative| O[2K - 16K Context]
+        J -->|Q&A| P[1K - 8K Context]
+        J -->|Summary| Q[4K - 32K Context]
+        J -->|Translation| R[2K - 8K Context]
     end
     
-    subgraph "⚡ Hardware Constraint Check"
+    subgraph "Hardware Constraint Check"
         K --> S[Memory Monitor]
         L --> S
         M --> S
@@ -112,17 +112,17 @@ graph TB
         Q --> S
         R --> S
         S --> T{GPU Memory<br/>Available?}
-        T -->|✅ Sufficient| U[Apply Recommended Context]
-        T -->|⚠️ Limited| V[Apply Fallback Context<br/>8K tokens]
+        T -->|Sufficient| U[Apply Recommended Context]
+        T -->|Limited| V[Apply Fallback Context<br/>8K tokens]
     end
     
-    subgraph "🏗️ Main Arbor Transformer"
+    subgraph "Main Arbor Transformer"
         U --> W[Dynamic Context Adaptation]
         V --> W
         W --> X[Positional Embeddings<br/>RoPE/ALiBi]
         X --> Y[24 Transformer Layers]
         
-        subgraph "🌱 Dynamic Growth Layer"
+        subgraph "Dynamic Growth Layer"
             Y --> Z[Layer Utilization Monitor]
             Z --> AA{Utilization > 95%?}
             AA -->|Yes| BB[Expand FFN Layer<br/>2x Growth Factor]
@@ -139,33 +139,33 @@ graph TB
         II --> JJ[Residual Connection]
     end
     
-    subgraph "📤 Output Generation"
+    subgraph "Output Generation"
         JJ --> KK[Language Model Head<br/>128K vocab]
         KK --> LL[Softmax Distribution]
         LL --> MM[Token Sampling<br/>Temperature/Top-p]
         MM --> NN[Generated Output]
     end
     
-    subgraph "🔄 Feedback Loop"
+    subgraph "Feedback Loop"
         NN --> OO[Performance Monitoring]
         OO --> PP[Context Efficiency Analysis]
         PP --> QQ[Router Model Updates]
         QQ --> C
     end
     
-    subgraph "💾 Model Management"
+    subgraph "Model Management"
         JJ --> RR[SafeTensors Serialization]
         RR --> SS[HuggingFace Integration]
         SS --> TT[Model Hub Upload]
         TT --> UU[Version Control]
     end
 
-    classDef inputStyle fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    classDef routerStyle fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef contextStyle fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
-    classDef transformerStyle fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
-    classDef outputStyle fill:#fce4ec,stroke:#880e4f,stroke-width:2px
-    classDef growthStyle fill:#fff8e1,stroke:#f57f17,stroke-width:2px
+    classDef inputStyle fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000000
+    classDef routerStyle fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000000
+    classDef contextStyle fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px,color:#000000
+    classDef transformerStyle fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#000000
+    classDef outputStyle fill:#fce4ec,stroke:#880e4f,stroke-width:2px,color:#000000
+    classDef growthStyle fill:#fff8e1,stroke:#f57f17,stroke-width:2px,color:#000000
     
     class A,B,C inputStyle
     class D,E,F,G,H,I routerStyle
@@ -177,10 +177,10 @@ graph TB
 
 </div>
 
-### 🔬 **Architecture Breakdown**
+### Architecture Breakdown
 
 <details>
-<summary><b>🧠 Task Complexity Router (Click to expand)</b></summary>
+<summary><b>Task Complexity Router (Click to expand)</b></summary>
 
 **Purpose**: Lightweight 3-layer transformer that analyzes input text to determine optimal processing parameters.
 
@@ -190,19 +190,19 @@ graph TB
 - **Real-Time Decision**: Sub-millisecond analysis for immediate context adaptation
 
 **Task Categories**:
-- 💬 **Chat**: Conversational interactions (1K-4K context)
-- 💻 **Code**: Programming tasks (4K-16K context)  
-- 🧠 **Reasoning**: Complex analysis (8K-32K context)
-- 📄 **Document**: Long-form processing (16K-131K context)
-- 🎨 **Creative**: Creative writing (2K-16K context)
-- ❓ **Q&A**: Question answering (1K-8K context)
-- 📝 **Summary**: Text summarization (4K-32K context)
-- 🌐 **Translation**: Language translation (2K-8K context)
+- **Chat**: Conversational interactions (1K-4K context)
+- **Code**: Programming tasks (4K-16K context)  
+- **Reasoning**: Complex analysis (8K-32K context)
+- **Document**: Long-form processing (16K-131K context)
+- **Creative**: Creative writing (2K-16K context)
+- **Q&A**: Question answering (1K-8K context)
+- **Summary**: Text summarization (4K-32K context)
+- **Translation**: Language translation (2K-8K context)
 
 </details>
 
 <details>
-<summary><b>🌱 Dynamic Growth System (Click to expand)</b></summary>
+<summary><b>Dynamic Growth System (Click to expand)</b></summary>
 
 **Purpose**: Monitors neural network utilization and expands capacity when needed.
 
@@ -221,7 +221,7 @@ graph TB
 </details>
 
 <details>
-<summary><b>⚡ Hardware-Aware Optimization (Click to expand)</b></summary>
+<summary><b>Hardware-Aware Optimization (Click to expand)</b></summary>
 
 **Purpose**: Automatically adapts to available computational resources.
 
