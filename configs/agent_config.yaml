@@ -1,0 +1,247 @@
+# Arbor Agentic Configuration
+# Configuration for agentic capabilities including code execution, MCP, and tools
+
+# 🤖 Agent Configuration
+agent:
+  model_path: "Noema-Research/arbor-base"
+  multimodal: false
+  max_context: 131072
+  device: "auto"
+  temperature: 0.7
+  max_iterations: 10
+
+# 🔧 Tool Configuration
+tools:
+  enabled_tools:
+    - python_code
+    - bash_command
+    - read_file
+    - write_file
+    - web_search
+    - calculator
+    - git
+  
+  # Code execution settings
+  code_execution:
+    use_docker: false  # Set to true for maximum security
+    timeout: 30        # seconds
+    memory_limit: 512  # MB
+    allowed_languages:
+      - python
+      - bash
+    
+    # Python-specific settings
+    python:
+      allowed_modules:
+        - math
+        - random
+        - datetime
+        - json
+        - base64
+        - hashlib
+        - uuid
+        - itertools
+        - collections
+        - functools
+        - operator
+        - string
+        - re
+        - numpy
+        - pandas
+        - matplotlib
+        - seaborn
+        - sklearn
+        - scipy
+        - requests
+      
+      # Blocked patterns for security
+      blocked_patterns:
+        - "import os"
+        - "import subprocess"
+        - "__import__"
+        - "exec("
+        - "eval("
+    
+    # Bash-specific settings
+    bash:
+      allowed_commands:
+        - ls
+        - cat
+        - grep
+        - find
+        - head
+        - tail
+        - wc
+        - sort
+        - uniq
+        - cut
+        - awk
+        - sed
+        - echo
+        - pwd
+        - date
+        - which
+        - whoami
+      
+      blocked_commands:
+        - rm
+        - rmdir
+        - mv
+        - cp
+        - chmod
+        - chown
+        - sudo
+        - su
+        - kill
+        - killall
+        - reboot
+        - shutdown
+
+  # File operation settings
+  file_operations:
+    max_file_size: 1048576  # 1MB
+    allowed_directories:
+      - "."
+      - "./data"
+      - "./output"
+      - "./temp"
+    
+    blocked_directories:
+      - "/etc"
+      - "/usr"
+      - "/bin"
+      - "/sbin"
+      - "/root"
+      - "/sys"
+      - "/proc"
+
+# 🔗 MCP (Model Context Protocol) Configuration
+mcp:
+  enabled: true
+  
+  # MCP servers to connect to
+  servers:
+    - name: "filesystem"
+      url: "ws://localhost:8765"
+      description: "File system operations"
+    
+    - name: "web"
+      url: "ws://localhost:8766"
+      description: "Web browsing and search"
+  
+  # MCP client settings
+  client:
+    timeout: 30
+    max_retries: 3
+    protocol_version: "2024-11-05"
+
+# 🧠 Planning and Reasoning Configuration
+planning:
+  enabled: true
+  
+  # Task decomposition settings
+  decomposition:
+    max_tasks_per_plan: 20
+    max_depth: 5
+    complexity_threshold: 0.8
+  
+  # Reasoning chain settings
+  reasoning:
+    min_confidence: 0.6
+    max_steps: 50
+    enable_self_reflection: true
+
+# 📊 Monitoring and Logging
+monitoring:
+  log_level: "INFO"
+  log_file: "arbor_agent.log"
+  
+  # Performance tracking
+  track_performance: true
+  track_tool_usage: true
+  track_reasoning_chains: true
+  
+  # Metrics to collect
+  metrics:
+    - execution_time
+    - tool_call_frequency
+    - success_rate
+    - confidence_scores
+
+# 🛡️ Security Settings
+security:
+  # Sandbox settings
+  sandbox:
+    enabled: true
+    memory_limit: 512  # MB
+    cpu_limit: 50      # % of CPU
+    network_access: false
+    file_system_access: "restricted"
+  
+  # Rate limiting
+  rate_limiting:
+    enabled: true
+    max_requests_per_minute: 60
+    max_tokens_per_request: 4096
+  
+  # Content filtering
+  content_filter:
+    enabled: true
+    block_harmful_content: true
+    block_sensitive_operations: true
+
+# 🔄 System Prompts
+prompts:
+  system_prompt: |
+    You are Arbor, an advanced AI agent with access to various tools and capabilities.
+    
+    You can execute code, search the web, read/write files, and use other tools to help users accomplish tasks.
+    
+    Guidelines:
+    - Be thorough and accurate
+    - Explain your thought process
+    - Use tools when they would be helpful
+    - Provide clear, actionable responses
+    - Handle errors gracefully
+    - Always prioritize safety and security
+  
+  tool_calling_prompt: |
+    To use a tool, format your response as:
+    ```tool_call
+    {
+        "name": "tool_name",
+        "arguments": {
+            "arg1": "value1",
+            "arg2": "value2"
+        }
+    }
+    ```
+  
+  reasoning_prompt: |
+    Think step by step about this problem:
+    1. Understand the goal
+    2. Break down into sub-tasks
+    3. Plan your approach
+    4. Execute with tools
+    5. Verify results
+
+# 🎛️ Advanced Features
+advanced:
+  # Adaptive context
+  adaptive_context:
+    enabled: true
+    min_context: 1024
+    max_context: 131072
+    router_confidence_threshold: 0.8
+  
+  # Memory management
+  memory:
+    conversation_history_limit: 50
+    tool_result_history_limit: 20
+    reasoning_chain_limit: 100
+  
+  # Learning and adaptation
+  learning:
+    enabled: false  # Experimental feature
+    learn_from_feedback: false
+    adapt_tool_selection: false

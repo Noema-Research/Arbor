@@ -37,7 +37,8 @@
 | 🤖 **Task Router** | AI model analyzes inputs and optimizes settings | ✅ **Active** |
 | 🏢 **Enterprise Ready** | Complete distributed training and deployment | ✅ **Active** |
 | 🎭 **Multimodal Support** | Vision, audio, video integration with training scripts | ✅ **Implemented** |
-| 🚀 **Post-Training** | Comprehensive fine-tuning and specialization | ✅ **Active** |
+| �️ **Agentic AI** | Tool calling, code execution, MCP integration | ✅ **Implemented** |
+| �🚀 **Post-Training** | Comprehensive fine-tuning and specialization | ✅ **Active** |
 | 🛡️ **SafeTensors** | Secure model format without binary dependencies | ✅ **Active** |
 | 🔄 **Fresh Tokenizer** | Always downloads latest Hermes-4-405B (128K vocab) | ✅ **Active** |
 | ⚙️ **YAML Config** | Simple configuration-driven training pipeline | ✅ **Active** |
@@ -479,6 +480,162 @@ python train_multimodal.py --config configs/multimodal_training_config.yaml --lo
 - Curriculum learning from simple to complex multimodal tasks
 
 </details>
+
+## 🤖 Agentic Capabilities
+
+Arbor includes comprehensive **agentic AI capabilities** with tool calling, code execution, and reasoning:
+
+### 🛠️ **Tool-Calling Agent**
+
+Run Arbor as an intelligent agent with access to tools and code execution:
+
+```bash
+# 🚀 Launch interactive agentic interface
+python inference_agent.py --model Noema-Research/arbor-base
+
+# 🔧 With additional tools and MCP servers
+python inference_agent.py \
+  --add-tools git \
+  --mcp-servers ws://localhost:8765 ws://localhost:8766
+
+# 📝 Run batch commands
+python inference_agent.py --batch commands.txt
+```
+
+### ⚡ **Built-in Tools**
+
+<div align="center">
+
+| Tool | Description | Example Usage |
+|------|-------------|---------------|
+| 🐍 **Python Code** | Execute Python in sandboxed environment | "Calculate fibonacci sequence" |
+| 💻 **Bash Commands** | Run shell commands safely | "List files in current directory" |
+| 📖 **File Operations** | Read/write files with security checks | "Read config.yaml and analyze structure" |
+| 🔍 **Web Search** | Search the internet for information | "Find latest Python best practices" |
+| 🧮 **Calculator** | Mathematical calculations | "Solve quadratic equation 2x² + 5x - 3 = 0" |
+| 🔄 **Git Operations** | Version control operations | "Show git status and recent commits" |
+
+</div>
+
+### 🧠 **Multi-Step Reasoning**
+
+Arbor can break down complex tasks and execute them systematically:
+
+```python
+# Example: Complex data analysis task
+user_query = """
+Analyze sales data from CSV file, create visualizations, 
+and generate a summary report with recommendations
+"""
+
+# Arbor automatically:
+# 1. Reads the CSV file
+# 2. Analyzes data structure and patterns  
+# 3. Creates appropriate visualizations
+# 4. Generates insights and recommendations
+# 5. Saves results to output files
+```
+
+### 🔗 **MCP Integration**
+
+Full **Model Context Protocol** support for standardized tool interfaces:
+
+```yaml
+# MCP Configuration
+mcp:
+  servers:
+    - name: "filesystem"
+      url: "ws://localhost:8765"
+    - name: "browser"  
+      url: "ws://localhost:8766"
+```
+
+**MCP Features:**
+- 🔌 **Standardized Protocols**: Connect to any MCP-compatible service
+- 🛠️ **Tool Discovery**: Automatically discover and use available tools
+- 📡 **Resource Sharing**: Access shared resources across different contexts
+- 🔄 **Live Updates**: Dynamic tool registration and capability updates
+
+### 🎯 **Agent Examples**
+
+<details>
+<summary><b>🔥 Interactive Agent Examples</b></summary>
+
+**Code Development Assistant:**
+```
+👤 User: "Create a web scraper for news articles"
+
+🤖 Arbor: I'll help you create a web scraper. Let me break this down:
+
+🔧 Tool: python_code
+```python
+import requests
+from bs4 import BeautifulSoup
+import csv
+from datetime import datetime
+
+def scrape_news(url, max_articles=10):
+    # Implementation here...
+    pass
+```
+
+✅ Web scraper created successfully!
+```
+
+**Data Analysis Workflow:**
+```
+👤 User: "Analyze the sales data and create a dashboard"
+
+🤖 Arbor: I'll analyze your sales data step by step:
+
+1. 🔧 Reading data file...
+2. 🧮 Calculating key metrics...
+3. 📊 Creating visualizations...
+4. 📝 Generating summary report...
+
+✅ Analysis complete! Dashboard saved to sales_dashboard.html
+```
+
+**System Administration:**
+```
+👤 User: "Check system health and disk usage"
+
+🤖 Arbor: Let me check your system status:
+
+🔧 Tool: bash_command
+- CPU usage: 23%
+- Memory: 8.2GB / 16GB (51%)
+- Disk: 156GB / 512GB (30%)
+
+✅ System is healthy! No issues detected.
+```
+
+</details>
+
+### ⚙️ **Agent Configuration**
+
+Configure agentic behavior with `configs/agent_config.yaml`:
+
+```yaml
+# 🤖 Agent settings
+agent:
+  max_iterations: 10
+  temperature: 0.7
+  reasoning_enabled: true
+
+# 🔧 Tool security
+tools:
+  code_execution:
+    use_docker: true
+    timeout: 30
+    memory_limit: 512
+
+# 🛡️ Security settings  
+security:
+  sandbox:
+    enabled: true
+    network_access: false
+```
 
 ## 📊 Architecture Deep Dive
 
