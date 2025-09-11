@@ -8,8 +8,11 @@ from .dataset import (
     TextFileDataset,
     StreamingTextDataset,
     JSONLDataset,
-    create_dataloader,
-    split_dataset,
+)
+from .synthetic import (
+    SyntheticDataset,
+    SyntheticClassificationDataset,
+    SyntheticMultimodalDataset,
 )
 
 __all__ = [
@@ -20,6 +23,9 @@ __all__ = [
     "TextFileDataset",
     "StreamingTextDataset",
     "JSONLDataset",
+    "SyntheticDataset",
+    "SyntheticClassificationDataset",
+    "SyntheticMultimodalDataset",
     "create_dataloader",
     "split_dataset",
 ]

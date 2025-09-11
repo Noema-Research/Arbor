@@ -10,16 +10,20 @@
 
 1. [Overview](#overview)
 2. [Architecture](#architecture)
-3. [Installation & Setup](#installation--setup)
-4. [Configuration](#configuration)
-5. [Training](#training)
-6. [Adaptive Context System](#adaptive-context-system)
-7. [Post-Training & Fine-Tuning](#post-training--fine-tuning)
-8. [API Reference](#api-reference)
-9. [Examples & Tutorials](#examples--tutorials)
-10. [Performance & Optimization](#performance--optimization)
-11. [Troubleshooting](#troubleshooting)
-12. [Development & Contributing](#development--contributing)
+3. [Agentic AI System](#agentic-ai-system)
+4. [Layer Growth System](#layer-growth-system)
+5. [Multimodal Capabilities](#multimodal-capabilities)
+6. [Installation & Setup](#installation--setup)
+7. [Configuration](#configuration)
+8. [Training](#training)
+9. [Adaptive Context System](#adaptive-context-system)
+10. [Post-Training & Fine-Tuning](#post-training--fine-tuning)
+11. [Enterprise Deployment](#enterprise-deployment)
+12. [API Reference](#api-reference)
+13. [Examples & Tutorials](#examples--tutorials)
+14. [Performance & Optimization](#performance--optimization)
+15. [Troubleshooting](#troubleshooting)
+16. [Development & Contributing](#development--contributing)
 
 ---
 
@@ -28,17 +32,23 @@
 **Arbor** is a revolutionary transformer architecture developed by [Noema Research](https://github.com/Noema-Research) that features:
 
 - 🧠 **Adaptive Context Windows**: Intelligent context scaling from 1K to 131K tokens
-- 🌱 **Dynamic Neural Growth**: Architecture expands during training (699M→799M parameters)
+- 🌱 **Dynamic Neural Growth**: Width growth (699M→799M) + Depth growth (24→64 layers)
+- 🤖 **Agentic AI Capabilities**: Tool calling, code execution, reasoning, and MCP integration
+- 🎭 **Multimodal Intelligence**: Vision, audio, video processing with unified embeddings
 - 🎯 **Task-Aware Routing**: AI-powered analysis for optimal resource allocation
+- 🏢 **Enterprise Scale**: Production-ready 200B-400B parameter deployments
 - 🤗 **HuggingFace Integration**: Full compatibility with Transformers ecosystem
 - 🔧 **Production Ready**: SafeTensors, YAML configuration, comprehensive tooling
 
 ### Key Innovations
 
-1. **Two-Stage Adaptive Architecture**: Lightweight router + main transformer
-2. **Real-Time Context Adaptation**: Context windows change based on task complexity
-3. **Hardware-Aware Scaling**: Automatic optimization for available resources
-4. **Comprehensive Post-Training**: Fine-tuning, instruction tuning, domain adaptation
+1. **Dual-Axis Growth**: Both parameter (width) and layer (depth) scaling
+2. **Two-Stage Adaptive Architecture**: Lightweight router + main transformer
+3. **Real-Time Context Adaptation**: Context windows change based on task complexity
+4. **Agentic Intelligence**: Complete tool-calling agent with secure code execution
+5. **Hardware-Aware Scaling**: Automatic optimization for available resources
+6. **Multimodal Fusion**: Cross-modal attention across text, vision, audio, video
+7. **Comprehensive Post-Training**: Fine-tuning, instruction tuning, domain adaptation
 
 ---
 
@@ -49,17 +59,32 @@
 ```
 🌳 Arbor Architecture
 ├── 🧠 Task Complexity Router (3-layer lightweight transformer)
-│   ├── Task Type Detection (8 categories)
+│   ├── Task Type Detection (8+ categories)
 │   ├── Complexity Analysis (4 levels)
+│   ├── Modality Detection (text/vision/audio/video)
 │   └── Context Recommendation (1K-131K tokens)
-├── 🏗️ Main Transformer (24-layer dynamic architecture)
+├── 🏗️ Main Transformer (24-64 layers, adaptive depth)
 │   ├── Adaptive Context Manager
-│   ├── Expandable FFN Layers
-│   ├── Multi-Head Attention
-│   └── Growth Monitoring System
+│   ├── Expandable FFN Layers (width growth)
+│   ├── Dynamic Layer Addition (depth growth)
+│   ├── Multi-Head Cross-Modal Attention
+│   ├── Growth Monitoring System
+│   └── Layer Utilization Tracking
+├── 🤖 Agentic AI System
+│   ├── Tool Calling Framework
+│   ├── Code Execution Engine (Python/Bash/Docker)
+│   ├── MCP Integration (Model Context Protocol)
+│   ├── Task Planning & Reasoning
+│   └── Safety & Sandboxing
+├── 🎭 Multimodal Processing
+│   ├── Vision Encoder (CLIP/EVA)
+│   ├── Audio Encoder (Whisper/Wav2Vec2)
+│   ├── Video Encoder (VideoMAE/TimeSformer)
+│   └── Cross-Modal Fusion Layer
 └── 🎯 Integration Layer
     ├── HuggingFace Compatibility
     ├── SafeTensors Support
+    ├── Enterprise Scaling (200B-400B)
     └── YAML Configuration
 ```
 
@@ -67,15 +92,18 @@
 
 | Component | Specification | Description |
 |-----------|---------------|-------------|
-| **Architecture** | Transformer Decoder | Causal language modeling |
+| **Architecture** | Transformer Decoder | Causal language modeling with agentic capabilities |
 | **Base Parameters** | 699M | Starting parameter count |
-| **Growth Capacity** | 799M | Maximum after expansion |
+| **Growth Capacity** | 799M (width) | Maximum after FFN expansion |
+| **Enterprise Scale** | 200B-400B | Production deployment capability |
+| **Layer Range** | 24-64 layers | Adaptive depth scaling |
 | **Vocabulary** | 128K tokens | Hermes-4-405B tokenizer |
 | **Context Range** | 1K - 131K | Adaptive window size |
-| **Layers** | 24 | Transformer blocks |
 | **Hidden Size** | 1024 | Embedding dimension |
 | **Attention Heads** | 16 | Multi-head attention |
-| **FFN Dimension** | 4096 | Feed-forward network |
+| **FFN Dimension** | 4096-8192 | Expandable feed-forward |
+| **Modalities** | Text/Vision/Audio/Video | Unified multimodal processing |
+| **Agentic Tools** | 6+ built-in | Code execution, file ops, web search |
 
 ### Dynamic Growth Mechanism
 
@@ -111,6 +139,183 @@ class ExpandableFFN(nn.Module):
             self.w2.bias.copy_(old_w2.bias)
             
         self.current_ffn_dim = new_dim
+```
+
+---
+
+## Agentic AI System
+
+Arbor includes a comprehensive agentic AI system that transforms the base transformer into an autonomous agent capable of tool calling, code execution, reasoning, and task planning.
+
+### Core Agent Components
+
+```python
+from arbor.agents import ArborAgent
+from arbor.modeling.model import ArborTransformer
+
+# Create an agentic Arbor model
+model = ArborTransformer.from_pretrained("Noema-Research/arbor-base")
+agent = ArborAgent(model)
+
+# The agent can now:
+# - Execute code in multiple languages
+# - Perform file operations
+# - Search the web
+# - Use external tools via MCP
+# - Plan and execute multi-step tasks
+```
+
+### Tool Calling Framework
+
+The agent system includes a comprehensive tool registry:
+
+| Tool | Description | Capabilities |
+|------|-------------|--------------|
+| **PythonCodeTool** | Execute Python code | Data analysis, scripting, ML |
+| **BashCommandTool** | Shell command execution | System operations, file management |
+| **DockerExecutor** | Containerized execution | Isolated environments, package installs |
+| **FileReadTool** | File system operations | Read, write, analyze files |
+| **WebSearchTool** | Internet search | Research, fact-checking |
+| **CalculatorTool** | Mathematical computation | Complex calculations |
+| **GitTool** | Version control | Repository management |
+
+### Code Execution Security
+
+All code execution is sandboxed with comprehensive safety measures:
+
+```python
+# Security configuration
+agent.configure_security({
+    "enable_docker": True,
+    "network_access": False,
+    "file_system_access": "restricted",
+    "max_execution_time": 30,
+    "max_memory": "512MB",
+    "dangerous_imports": ["os", "subprocess", "shutil"]
+})
+```
+
+### Model Context Protocol (MCP)
+
+Arbor implements the industry-standard MCP for tool integration:
+
+```python
+from arbor.agents import MCPClient
+
+# Connect to external MCP servers
+mcp_client = MCPClient("ws://api.example.com/mcp")
+agent = ArborAgent(model, mcp_client=mcp_client)
+
+# Agent now has access to all tools from the MCP server
+```
+
+---
+
+## Layer Growth System
+
+Arbor features dynamic layer growth that allows models to scale from 24 to 64 layers during training based on utilization patterns.
+
+### Growth Mechanism
+
+```python
+class ArborTransformer(nn.Module):
+    def grow_layers(self, num_new_layers: int):
+        \"\"\"Add new transformer layers strategically.\"\"\"
+        if not self.config.layer_growth_enabled:
+            return
+            
+        # Insert new layers at middle position for optimal learning
+        insertion_point = len(self.layers) // 2
+        
+        for i in range(num_new_layers):
+            # Create new layer initialized from nearby layers
+            new_layer = ArborBlock(self.config)
+            self.layers.insert(insertion_point + i, new_layer)
+```
+
+### Utilization Monitoring
+
+The system tracks layer utilization to determine when growth is needed:
+
+```python
+def track_layer_utilization(self, hidden_states, layer_idx):
+    \"\"\"Monitor layer activation patterns.\"\"\"
+    activation_magnitude = torch.norm(hidden_states, dim=-1).mean()
+    activation_sparsity = 1.0 - (hidden_states == 0).float().mean()
+    utilization = (activation_magnitude * activation_sparsity).item()
+    
+    # Store for growth decision making
+    self.layer_utilization_history.append({layer_idx: utilization})
+```
+
+### Growth Configuration
+
+```yaml
+# Layer growth settings in config
+growth:
+  layer_growth_enabled: true
+  min_layers: 24
+  max_layers: 64
+  layer_growth_threshold: 0.92
+  layer_growth_factor: 4
+  layer_growth_cooldown: 5000
+```
+
+### Growth Benefits
+
+1. **Efficiency**: Start with fewer layers for faster initial training
+2. **Adaptability**: Add capacity only when complexity requires it
+3. **Stability**: Preserve learned knowledge during expansion
+4. **Performance**: Better utilization of computational resources
+
+---
+
+## Multimodal Capabilities
+
+Arbor supports unified processing of text, vision, audio, and video inputs through a sophisticated multimodal architecture.
+
+### Multimodal Architecture
+
+```python
+from arbor.modeling.multimodal import MultimodalArborTransformer
+
+# Create multimodal model
+model = MultimodalArborTransformer(config)
+
+# Process different modalities
+text_input = "Describe this image"
+image_input = load_image("photo.jpg")
+audio_input = load_audio("speech.wav")
+
+# Unified processing
+output = model(
+    text_input=text_input,
+    image_input=image_input,
+    audio_input=audio_input
+)
+```
+
+### Encoder Integration
+
+| Modality | Encoder | Output Dimension | Features |
+|----------|---------|------------------|----------|
+| **Text** | Hermes-4-405B Tokenizer | 1024-dim | 128K vocabulary |
+| **Vision** | CLIP/EVA | 1024-dim | Image understanding |
+| **Audio** | Whisper/Wav2Vec2 | 1024-dim | Speech recognition |
+| **Video** | VideoMAE/TimeSformer | 1024-dim | Temporal understanding |
+
+### Cross-Modal Fusion
+
+```python
+class CrossModalFusion(nn.Module):
+    def forward(self, text_emb, vision_emb, audio_emb, video_emb):
+        # Attention-based fusion across modalities
+        fused_emb = self.cross_attention(
+            query=text_emb,
+            key=torch.cat([vision_emb, audio_emb, video_emb], dim=1),
+            value=torch.cat([vision_emb, audio_emb, video_emb], dim=1)
+        )
+        return fused_emb
 ```
 
 ---
