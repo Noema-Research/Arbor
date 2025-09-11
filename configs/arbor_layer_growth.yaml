@@ -1,10 +1,10 @@
-# Arbor Base - Development baseline configuration
-# Medium-sized model for development and experimentation
+# Arbor Layer Growth - Adaptive depth scaling configuration
+# Demonstrates dynamic layer growth from 24 to 64 layers
 
 model:
   vocab_size: 10000
   dim: 512
-  num_layers: 8
+  num_layers: 24  # Starting number of layers
   num_heads: 8
   ffn_dim: 2048
   max_seq_length: 1024
@@ -21,14 +21,14 @@ data:
   type: "synthetic"
   vocab_size: 10000
   seq_length: 1024
-  num_sequences: 50000
-  batch_size: 32
+  num_sequences: 100000  # Larger dataset for growth testing
+  batch_size: 16  # Smaller batch to force more intensive layer usage
   val_split: 0.1
   test_split: 0.05
 
 # Training configuration
 training:
-  max_steps: 20000
+  max_steps: 50000  # Longer training to see growth
   learning_rate: 1e-4
   weight_decay: 0.01
   optimizer: "adamw"
@@ -49,9 +49,9 @@ training:
   eval_every: 1000
   save_every: 2000
 
-# Growth configuration (disabled for baseline)
+# Growth configuration (enabled with layer growth)
 growth:
-  enabled: false
+  enabled: true
   add_hidden: 256
   max_events: 6
   cooldown_steps: 2000
@@ -59,13 +59,13 @@ growth:
   layers_per_event: 2
   new_param_lr_multiplier: 0.5
   
-  # Layer growth configuration
-  layer_growth_enabled: false  # Disabled for baseline
+  # Layer growth configuration - ENABLED
+  layer_growth_enabled: true
   min_layers: 24
   max_layers: 64
-  layer_growth_threshold: 0.92
-  layer_growth_factor: 4
-  layer_growth_cooldown: 5000
+  layer_growth_threshold: 0.92  # Trigger when 92% of capacity used
+  layer_growth_factor: 4  # Add 4 layers at a time
+  layer_growth_cooldown: 5000  # Wait 5000 steps between layer additions
   
   triggers:
     - type: "plateau"
@@ -91,11 +91,11 @@ distributed:
 logging:
   log_level: "INFO"
   use_wandb: true
-  wandb_project: "arbor-o1-base"
-  checkpoint_dir: "checkpoints"
+  wandb_project: "arbor-o1-layer-growth"
+  checkpoint_dir: "checkpoints/layer_growth"
   
 # Experiment tracking
 experiment:
-  name: "arbor_base_fixed"
-  tags: ["development", "baseline", "fixed-size"]
-  notes: "Medium-sized baseline model without growth for comparison"
+  name: "arbor_layer_growth_demo"
+  tags: ["development", "layer-growth", "adaptive-depth", "24-64-layers"]
+  notes: "Demonstration of dynamic layer growth scaling from 24 to 64 layers based on utilization"

@@ -37,12 +37,19 @@ class ArborConfig:
     causal: bool = True
     tie_word_embeddings: bool = True
     
-    # Growth settings (future-proofed for enterprise scale)
+    # Dynamic Growth Settings
     growth_enabled: bool = True
-    growth_factor: float = 2.0  # Growth multiplier
+    growth_factor: float = 2.0  # FFN growth multiplier
     max_growth_factor: float = 8.0  # Maximum total growth for enterprise scale
     target_params: Optional[int] = None  # Target parameter count (e.g., 400B)
     growth_schedule: str = "dynamic"  # "dynamic", "scheduled", "manual"
+    
+    # Dynamic Layer Growth Settings
+    layer_growth_enabled: bool = True
+    min_layers: int = 24  # Minimum number of layers
+    max_layers: int = 64  # Maximum number of layers  
+    layer_growth_threshold: float = 0.92  # Utilization threshold for layer growth
+    layer_growth_factor: int = 4  # How many layers to add at once
     
     # Enterprise scaling configuration
     enterprise_scale: bool = False  # Enable enterprise scaling features
@@ -217,8 +224,13 @@ class ArborTransformer(nn.Module):
         x = self.dropout(x)
         
         # Through transformer layers
-        for layer in self.layers:
+        layer_activations = {}
+        for i, layer in enumerate(self.layers):
             x = layer(x, attention_mask=attention_mask)
+            
+            # Track activations for growth monitoring (during training)
+            if self.training and self.config.layer_growth_enabled:
+                layer_activations[f"layer_{i}"] = x.detach().clone()
         
         # Final normalization
         x = self.final_norm(x)
@@ -243,6 +255,10 @@ class ArborTransformer(nn.Module):
                 shift_labels.view(-1)
             )
         
+        # Auto-grow layers if needed during training
+        if self.training and self.config.enable_layer_growth:
+            self.auto_grow_if_needed()
+            
         if return_dict:
             return {
                 "logits": logits,
@@ -308,6 +324,159 @@ class ArborTransformer(nn.Module):
                 self.lm_head.weight[old_vocab:].normal_(0, std)
         
         print(f"Vocabulary expanded: {old_vocab} -> {self.config.vocab_size}")
+    
+    def grow_layers(self, add_layers: int) -> None:
+        """
+        Add new transformer layers to increase model depth.
+        
+        Args:
+            add_layers: Number of layers to add
+        """
+        if add_layers <= 0:
+            return
+        
+        # Check if we can add more layers
+        current_layers = len(self.layers)
+        if current_layers + add_layers > self.config.max_layers:
+            max_addable = self.config.max_layers - current_layers
+            if max_addable <= 0:
+                print(f"⚠️ Cannot add layers: already at maximum ({self.config.max_layers})")
+                return
+            add_layers = max_addable
+            print(f"⚠️ Limiting layer growth to {add_layers} (max: {self.config.max_layers})")
+        
+        growth_event = {
+            "type": "layer_growth",
+            "old_layer_count": current_layers,
+            "add_layers": add_layers,
+            "old_param_count": self.param_count(),
+        }
+        
+        # Create new layers with same configuration as existing layers
+        new_layers = []
+        for i in range(add_layers):
+            new_layer = ArborBlock(
+                dim=self.config.dim,
+                num_heads=self.config.num_heads,
+                ffn_dim=self.config.ffn_dim,
+                dropout=self.config.dropout,
+                attention_dropout=self.config.attention_dropout,
+                ffn_dropout=self.config.ffn_dropout,
+                layer_norm_eps=self.config.layer_norm_eps,
+                activation=self.config.activation,
+                causal=self.config.causal,
+            )
+            
+            # Initialize weights of new layer
+            new_layer.apply(self._init_weights)
+            new_layers.append(new_layer)
+        
+        # Insert new layers strategically (middle of the model for best learning)
+        insert_position = current_layers // 2
+        
+        # Convert to list, insert new layers, convert back to ModuleList
+        layer_list = list(self.layers)
+        for i, new_layer in enumerate(new_layers):
+            layer_list.insert(insert_position + i, new_layer)
+        
+        self.layers = nn.ModuleList(layer_list)
+        
+        # Update config
+        self.config.num_layers = len(self.layers)
+        
+        # Move to appropriate device if needed
+        if hasattr(self, 'device') and self.device is not None:
+            for layer in new_layers:
+                layer.to(self.device)
+        elif next(self.parameters()).device != torch.device('cpu'):
+            device = next(self.parameters()).device
+            for layer in new_layers:
+                layer.to(device)
+        
+        growth_event["new_layer_count"] = len(self.layers)
+        growth_event["new_param_count"] = self.param_count()
+        growth_event["insert_position"] = insert_position
+        self.growth_history.append(growth_event)
+        
+        print(f"🌱 Model depth grown: {current_layers} -> {len(self.layers)} layers")
+        print(f"   📊 Parameters: {growth_event['old_param_count']:,} -> {growth_event['new_param_count']:,}")
+        print(f"   📍 Inserted at position: {insert_position}")
+    
+    def should_grow_layers(self, layer_utilizations: List[float]) -> bool:
+        """
+        Determine if the model should grow in depth (add layers).
+        
+        Args:
+            layer_utilizations: List of utilization scores for each layer (0.0 to 1.0)
+            
+        Returns:
+            bool: Whether to add new layers
+        """
+        if not self.config.layer_growth_enabled:
+            return False
+        
+        if len(self.layers) >= self.config.max_layers:
+            return False
+        
+        # Check if most layers are highly utilized
+        high_utilization_count = sum(1 for util in layer_utilizations 
+                                   if util >= self.config.layer_growth_threshold)
+        
+        # Require at least 80% of layers to be highly utilized
+        utilization_ratio = high_utilization_count / len(layer_utilizations)
+        
+        return utilization_ratio >= 0.8
+    
+    def calculate_layer_utilization(self, activations: Dict[str, torch.Tensor]) -> List[float]:
+        """
+        Calculate utilization scores for each layer based on activations.
+        
+        Args:
+            activations: Dictionary mapping layer names to activation tensors
+            
+        Returns:
+            List of utilization scores (0.0 to 1.0) for each layer
+        """
+        utilizations = []
+        
+        for i in range(len(self.layers)):
+            layer_key = f"layer_{i}"
+            if layer_key in activations:
+                activation = activations[layer_key]
+                
+                # Calculate activation statistics
+                mean_activation = activation.abs().mean().item()
+                std_activation = activation.std().item()
+                
+                # Simple utilization metric: normalized activation magnitude
+                # Higher activations suggest the layer is being heavily used
+                utilization = min(1.0, (mean_activation + std_activation) / 2.0)
+                utilizations.append(utilization)
+            else:
+                # Default to moderate utilization if no activation data
+                utilizations.append(0.5)
+        
+        return utilizations
+    
+    def auto_grow_if_needed(self, layer_utilizations: List[float] = None) -> bool:
+        """
+        Automatically grow layers if utilization is high enough.
+        
+        Args:
+            layer_utilizations: Optional utilization scores for each layer
+            
+        Returns:
+            bool: Whether growth occurred
+        """
+        if layer_utilizations is None:
+            # Use dummy utilizations if not provided
+            layer_utilizations = [0.9] * len(self.layers)
+        
+        if self.should_grow_layers(layer_utilizations):
+            self.grow_layers(self.config.layer_growth_factor)
+            return True
+        
+        return False
     
     def param_count(self) -> int:
         """Return total number of parameters."""

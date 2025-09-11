@@ -156,47 +156,60 @@ graph TB
         Y --> AA[Dynamic Context Adaptation]
         Z --> AA
         AA --> BB[Positional Embeddings<br/>RoPE/ALiBi]
-        BB --> CC[24 Transformer Layers]
+        BB --> CC[24-64 Transformer Layers<br/>Adaptive Depth]
         
-        subgraph "Dynamic Growth Layer"
+        subgraph "Dynamic Growth System"
             CC --> DD[Layer Utilization Monitor]
-            DD --> EE{Utilization > 95%?}
-            EE -->|Yes| FF[Expand FFN Layer<br/>2x Growth Factor]
-            EE -->|No| GG[Continue Training]
-            FF --> HH[699M → 799M Parameters]
-            GG --> II[Maintain Current Size]
-            HH --> JJ[Updated Layer]
-            II --> JJ
+            DD --> EE{Layer Util > 92%?}
+            DD --> FF{FFN Util > 95%?}
+            
+            subgraph "Width Growth (FFN)"
+                FF -->|Yes| GG[Expand FFN Layer<br/>4096→8192 dimensions]
+                GG --> HH[699M → 799M Parameters]
+                FF -->|No| II[Maintain FFN Size]
+            end
+            
+            subgraph "Depth Growth (Layers)"
+                EE -->|80% layers| JJ[Add New Layers<br/>+4 at middle position]
+                JJ --> KK[24→28→32...→64 Layers]
+                EE -->|<80% layers| LL[Maintain Layer Count]
+            end
+            
+            HH --> MM[Updated Architecture]
+            II --> MM
+            KK --> MM
+            LL --> MM
+            MM --> NN[Growth Cooldown<br/>5000 steps]
         end
         
         subgraph "Multimodal Attention"
-            JJ --> KK[Multi-Head Attention<br/>16 heads, 1024-dim]
-            KK --> LL[Cross-Modal Attention<br/>Vision↔Text↔Audio↔Video]
-            LL --> MM[ExpandableFFN<br/>4096-dim → 8192-dim]
-            MM --> NN[Layer Normalization]
-            NN --> OO[Residual Connection]
+            NN --> OO[Multi-Head Attention<br/>16 heads, 1024-dim]
+            OO --> PP[Cross-Modal Attention<br/>Vision↔Text↔Audio↔Video]
+            PP --> QQ[ExpandableFFN<br/>4096-dim → 8192-dim]
+            QQ --> RR[Layer Normalization]
+            RR --> SS[Residual Connection]
         end
     end
     
     subgraph "Output Generation"
-        OO --> PP[Language Model Head<br/>128K vocab]
-        PP --> QQ[Softmax Distribution]
-        QQ --> RR[Token Sampling<br/>Temperature/Top-p]
-        RR --> SS[Generated Output]
+        SS --> TT[Language Model Head<br/>128K vocab]
+        TT --> UU[Softmax Distribution]
+        UU --> VV[Token Sampling<br/>Temperature/Top-p]
+        VV --> WW[Generated Output]
     end
     
     subgraph "Feedback Loop"
-        SS --> TT[Performance Monitoring]
-        TT --> UU[Context Efficiency Analysis]
-        UU --> VV[Router Model Updates]
-        VV --> F
+        WW --> XX[Performance Monitoring]
+        XX --> YY[Context Efficiency Analysis]
+        YY --> ZZ[Router Model Updates]
+        ZZ --> F
     end
     
     subgraph "Model Management"
-        OO --> WW[SafeTensors Serialization]
-        WW --> XX[HuggingFace Integration]
-        XX --> YY[Model Hub Upload]
-        YY --> ZZ[Version Control]
+        SS --> AAA[SafeTensors Serialization]
+        AAA --> BBB[HuggingFace Integration]
+        BBB --> CCC[Model Hub Upload]
+        CCC --> DDD[Version Control]
     end
 
     classDef inputStyle fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000000
@@ -206,12 +219,12 @@ graph TB
     classDef outputStyle fill:#fce4ec,stroke:#880e4f,stroke-width:2px,color:#000000
     classDef growthStyle fill:#fff8e1,stroke:#f57f17,stroke-width:2px,color:#000000
     
-    class A,B,C inputStyle
-    class D,E,F,G,H,I routerStyle
-    class J,K,L,M,N,O,P,Q,R,S,T,U,V contextStyle
-    class W,X,Y,GG,HH,II,JJ,KK,LL,MM,NN transformerStyle
-    class Z,AA,BB,CC,DD,EE,FF growthStyle
-    class OO,PP,QQ,RR,SS,TT,UU outputStyle
+    class A1,A2,A3,A4,B1,B2,B3,B4,C1,C2,C3,C4 inputStyle
+    class D,E,F,G,H,I,J,K,L routerStyle
+    class M,N,O,P,Q,R,S,T,U,V contextStyle
+    class W,X,Y,Z,AA,BB,OO,PP,QQ,RR transformerStyle
+    class CC,DD,EE,FF,GG,HH,II,JJ,KK,LL,MM,NN growthStyle
+    class SS,TT,UU,VV,WW,XX,YY outputStyle
 ```
 
 </div>
@@ -245,17 +258,27 @@ graph TB
 
 **Purpose**: Monitors neural network utilization and expands capacity when needed.
 
-**Growth Process**:
+**Growth Modes**:
+
+🌱 **Width Growth (FFN Expansion)**:
 1. **Utilization Monitoring**: Tracks FFN layer activation patterns
 2. **Threshold Detection**: Triggers expansion when utilization > 95%
 3. **Capacity Expansion**: Doubles FFN layer size (4096 → 8192 dimensions)
 4. **Weight Preservation**: Copies existing weights to maintain learned knowledge
 5. **Parameter Tracking**: Monitors growth from 699M → 799M parameters
 
+🏗️ **Depth Growth (Layer Addition)** - NEW:
+1. **Layer Utilization**: Monitors activation intensity across all layers
+2. **Growth Trigger**: Expands when 80% of layers exceed 92% utilization
+3. **Strategic Insertion**: Adds new layers at optimal positions (middle)
+4. **Adaptive Scaling**: Grows from 24 to 64 layers as needed
+5. **Intelligent Pacing**: 4-layer increments with 5000-step cooldown
+
 **Benefits**:
-- **Adaptive Learning**: Model grows as it encounters complex patterns
+- **Adaptive Learning**: Model grows both wide and deep as it encounters complex patterns
 - **Efficiency**: Only expands when necessary, not preemptively
 - **Stability**: Preserves existing knowledge during expansion
+- **Scalability**: Handles both parameter growth (width) and depth growth (layers)
 
 </details>
 
@@ -318,6 +341,24 @@ python train.py configs/training_config.yaml
 
 </details>
 
+<details>
+<summary><b>🏗️ Layer Growth Demo</b> (Click to expand)</summary>
+
+```bash
+# 🌱 Demonstrate dynamic layer growth (24 → 64 layers)
+python examples/layer_growth_demo.py
+
+# 📊 What you'll see:
+# ✅ Model starts with 24 layers, ~20M parameters
+# ✅ Layer utilization monitoring in real-time
+# ✅ Automatic layer addition when 92% threshold reached
+# ✅ Growth from 24 layers up to 64 layers
+# ✅ Training plots showing growth over time
+# ✅ Performance metrics and efficiency gains
+```
+
+</details>
+
 ### 🎛️ **Configuration**
 
 Create your training pipeline in `configs/training_config.yaml`:
@@ -327,10 +368,18 @@ Create your training pipeline in `configs/training_config.yaml`:
 model:
   vocab_size: 128000        # Hermes-4-405B vocabulary
   hidden_size: 1024         # Embedding dimension
-  num_layers: 24           # Transformer layers
+  num_layers: 24           # Starting transformer layers
   growth:
     enabled: true          # 🌱 Enable dynamic growth
     factor: 2.0           # Growth multiplier
+    
+    # 🏗️ Layer Growth (NEW)
+    layer_growth_enabled: true
+    min_layers: 24         # Start with 24 layers
+    max_layers: 64         # Grow up to 64 layers
+    layer_growth_threshold: 0.92  # 92% utilization trigger
+    layer_growth_factor: 4        # Add 4 layers at a time
+    layer_growth_cooldown: 5000   # Wait 5000 steps between growth
 
 # 🎯 Adaptive Context System  
 adaptive_context:
@@ -922,7 +971,9 @@ print(f"🤖 Arbor: {response}")
 ├── 📋 examples/                        # Usage examples
 │   ├── basic_training.py              # Simple training script
 │   ├── custom_datasets.py             # Custom data loading
-│   └── inference_demo.py              # Generation examples
+│   ├── inference_demo.py              # Generation examples
+│   ├── layer_growth_demo.py           # Layer growth demonstration
+│   └── agent_usage.py                 # Agentic AI examples
 ├── 🧪 tests/                          # Test suite
 │   ├── test_model.py                  # Model testing
 │   ├── test_training.py               # Training validation
