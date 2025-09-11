@@ -2,21 +2,7 @@
 
 # 🌳 Arbor
 
-*Growing Intelligence,## 🌟 Features
-
-### 🔥 **Core Capabilities**
-
-<div align="center">
-
-| Feature | Description | Status |
-|---------|-------------|--------|
-| 🎯 **Adaptive Context** | Smart 1K-131K token windows based on task complexity | ✅ **Active** |
-| 🌱 **Scalable Growth** | Neural architecture scales from 799M to 400B parameters | ✅ **Production Ready** |
-| 🤖 **Task Router** | AI model analyzes inputs and optimizes settings | ✅ **Active** |
-| 🏢 **Enterprise Ready** | Complete distributed training and deployment | ✅ **Active** |
-| 🎭 **Multimodal Support** | Vision, audio, video integration with training scripts | ✅ **Implemented** |
-| 🚀 **Post-Training** | Comprehensive fine-tuning and specialization | ✅ **Active** |
-| 🛡️ **SafeTensors** | Secure model format without binary dependencies | ✅ **Active** |a Time*
+*Growing Intelligence, One Layer at a Time*
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Production%20Ready-brightgreen?style=for-the-badge" alt="Status">
@@ -39,6 +25,22 @@
 **🏢 Enterprise Ready**: Current implementation features 799M parameters with full adaptive capabilities. The architecture is now **production-ready for 200B-400B parameters** with complete distributed training and enterprise deployment capabilities.
 
 </div>
+
+## 🌟 Features
+
+### 🔥 **Core Capabilities**
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| 🎯 **Adaptive Context** | Smart 1K-131K token windows based on task complexity | ✅ **Active** |
+| 🌱 **Scalable Growth** | Neural architecture scales from 799M to 400B parameters | ✅ **Production Ready** |
+| 🤖 **Task Router** | AI model analyzes inputs and optimizes settings | ✅ **Active** |
+| 🏢 **Enterprise Ready** | Complete distributed training and deployment | ✅ **Active** |
+| 🎭 **Multimodal Support** | Vision, audio, video integration with training scripts | ✅ **Implemented** |
+| 🚀 **Post-Training** | Comprehensive fine-tuning and specialization | ✅ **Active** |
+| 🛡️ **SafeTensors** | Secure model format without binary dependencies | ✅ **Active** |
+| 🔄 **Fresh Tokenizer** | Always downloads latest Hermes-4-405B (128K vocab) | ✅ **Active** |
+| ⚙️ **YAML Config** | Simple configuration-driven training pipeline | ✅ **Active** |
 
 ## ✨ What Makes Arbor Special
 
@@ -72,8 +74,6 @@
 
 ### 🔥 **Core Capabilities**
 
-<div align="center">
-
 | Feature | Description | Status |
 |---------|-------------|--------|
 | 🎯 **Adaptive Context** | Smart 1K-131K token windows based on task complexity | ✅ **Active** |
@@ -86,98 +86,116 @@
 | 🔄 **Fresh Tokenizer** | Always downloads latest Hermes-4-405B (128K vocab) | ✅ **Active** |
 | ⚙️ **YAML Config** | Simple configuration-driven training pipeline | ✅ **Active** |
 
-</div>
-
 ### 🎪 **Revolutionary Architecture**
 
 <div align="center">
 
 ```mermaid
 graph TB
-    subgraph "Input Processing"
-        A[Input Text] --> B[Tokenization<br/>Hermes-4-405B]
-        B --> C[Initial Analysis<br/>First 256 tokens]
+    subgraph "Multimodal Input Processing"
+        A1[Text Input] --> B1[Tokenization<br/>Hermes-4-405B]
+        A2[🖼️ Image Input] --> B2[Vision Encoder<br/>CLIP/EVA]
+        A3[🎵 Audio Input] --> B3[Audio Encoder<br/>Whisper/Wav2Vec2]
+        A4[🎬 Video Input] --> B4[Video Encoder<br/>VideoMAE/TimeSformer]
+        
+        B1 --> C1[Text Embeddings<br/>1024-dim]
+        B2 --> C2[Vision Embeddings<br/>1024-dim]
+        B3 --> C3[Audio Embeddings<br/>1024-dim]
+        B4 --> C4[Video Embeddings<br/>1024-dim]
+        
+        C1 --> D[Cross-Modal Fusion<br/>Attention Mechanism]
+        C2 --> D
+        C3 --> D
+        C4 --> D
+        D --> E[Unified Embeddings<br/>1024-dim]
     end
     
     subgraph "Task Complexity Router"
-        C --> D[Router Embeddings<br/>256-dim]
-        D --> E[3-Layer Transformer<br/>Lightweight & Fast]
-        E --> F[Multi-Head Classification]
-        F --> G[Task Type<br/>8 categories]
-        F --> H[Complexity Score<br/>0.0 - 1.0]
-        F --> I[Context Recommendation<br/>1K - 131K tokens]
+        E --> F[Router Embeddings<br/>256-dim]
+        F --> G[3-Layer Transformer<br/>Lightweight & Fast]
+        G --> H[Multi-Head Classification]
+        H --> I[Task Type<br/>8+ categories]
+        H --> J[Complexity Score<br/>0.0 - 1.0]
+        H --> K[Context Recommendation<br/>1K - 131K tokens]
+        H --> L[Modality Weights<br/>Text/Vision/Audio/Video]
     end
     
     subgraph "Context Decision Engine"
-        G --> J{Task Analysis}
-        H --> J
-        I --> J
-        J -->|Chat| K[1K - 4K Context]
-        J -->|Code| L[4K - 16K Context]
-        J -->|Reasoning| M[8K - 32K Context]
-        J -->|Document| N[16K - 131K Context]
-        J -->|Creative| O[2K - 16K Context]
-        J -->|Q&A| P[1K - 8K Context]
-        J -->|Summary| Q[4K - 32K Context]
-        J -->|Translation| R[2K - 8K Context]
+        I --> M{Task Analysis}
+        J --> M
+        K --> M
+        L --> M
+        M -->|Chat| N[1K - 4K Context]
+        M -->|Code| O[4K - 16K Context]
+        M -->|Reasoning| P[8K - 32K Context]
+        M -->|Document| Q[16K - 131K Context]
+        M -->|Creative| R[2K - 16K Context]
+        M -->|🖼️ Vision-Text| S[4K - 32K Context]
+        M -->|🎵 Audio-Text| T[2K - 16K Context]
+        M -->|🎬 Video-Text| U[8K - 64K Context]
+        M -->|🎭 Multimodal| V[16K - 131K Context]
     end
     
     subgraph "Hardware Constraint Check"
-        K --> S[Memory Monitor]
-        L --> S
-        M --> S
-        N --> S
-        O --> S
-        P --> S
-        Q --> S
-        R --> S
-        S --> T{GPU Memory<br/>Available?}
-        T -->|Sufficient| U[Apply Recommended Context]
-        T -->|Limited| V[Apply Fallback Context<br/>8K tokens]
+        N --> W[Memory Monitor]
+        O --> W
+        P --> W
+        Q --> W
+        R --> W
+        S --> W
+        T --> W
+        U --> W
+        V --> W
+        W --> X{GPU Memory<br/>Available?}
+        X -->|Sufficient| Y[Apply Recommended Context]
+        X -->|Limited| Z[Apply Fallback Context<br/>8K tokens]
     end
     
     subgraph "Main Arbor Transformer"
-        U --> W[Dynamic Context Adaptation]
-        V --> W
-        W --> X[Positional Embeddings<br/>RoPE/ALiBi]
-        X --> Y[24 Transformer Layers]
+        Y --> AA[Dynamic Context Adaptation]
+        Z --> AA
+        AA --> BB[Positional Embeddings<br/>RoPE/ALiBi]
+        BB --> CC[24 Transformer Layers]
         
         subgraph "Dynamic Growth Layer"
-            Y --> Z[Layer Utilization Monitor]
-            Z --> AA{Utilization > 95%?}
-            AA -->|Yes| BB[Expand FFN Layer<br/>2x Growth Factor]
-            AA -->|No| CC[Continue Training]
-            BB --> DD[699M → 799M Parameters]
-            CC --> EE[Maintain Current Size]
-            DD --> FF[Updated Layer]
-            EE --> FF
+            CC --> DD[Layer Utilization Monitor]
+            DD --> EE{Utilization > 95%?}
+            EE -->|Yes| FF[Expand FFN Layer<br/>2x Growth Factor]
+            EE -->|No| GG[Continue Training]
+            FF --> HH[699M → 799M Parameters]
+            GG --> II[Maintain Current Size]
+            HH --> JJ[Updated Layer]
+            II --> JJ
         end
         
-        FF --> GG[Multi-Head Attention<br/>16 heads, 1024-dim]
-        GG --> HH[ExpandableFFN<br/>4096-dim → 8192-dim]
-        HH --> II[Layer Normalization]
-        II --> JJ[Residual Connection]
+        subgraph "Multimodal Attention"
+            JJ --> KK[Multi-Head Attention<br/>16 heads, 1024-dim]
+            KK --> LL[Cross-Modal Attention<br/>Vision↔Text↔Audio↔Video]
+            LL --> MM[ExpandableFFN<br/>4096-dim → 8192-dim]
+            MM --> NN[Layer Normalization]
+            NN --> OO[Residual Connection]
+        end
     end
     
     subgraph "Output Generation"
-        JJ --> KK[Language Model Head<br/>128K vocab]
-        KK --> LL[Softmax Distribution]
-        LL --> MM[Token Sampling<br/>Temperature/Top-p]
-        MM --> NN[Generated Output]
+        OO --> PP[Language Model Head<br/>128K vocab]
+        PP --> QQ[Softmax Distribution]
+        QQ --> RR[Token Sampling<br/>Temperature/Top-p]
+        RR --> SS[Generated Output]
     end
     
     subgraph "Feedback Loop"
-        NN --> OO[Performance Monitoring]
-        OO --> PP[Context Efficiency Analysis]
-        PP --> QQ[Router Model Updates]
-        QQ --> C
+        SS --> TT[Performance Monitoring]
+        TT --> UU[Context Efficiency Analysis]
+        UU --> VV[Router Model Updates]
+        VV --> F
     end
     
     subgraph "Model Management"
-        JJ --> RR[SafeTensors Serialization]
-        RR --> SS[HuggingFace Integration]
-        SS --> TT[Model Hub Upload]
-        TT --> UU[Version Control]
+        OO --> WW[SafeTensors Serialization]
+        WW --> XX[HuggingFace Integration]
+        XX --> YY[Model Hub Upload]
+        YY --> ZZ[Version Control]
     end
 
     classDef inputStyle fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000000
