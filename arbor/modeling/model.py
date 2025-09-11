@@ -37,14 +37,34 @@ class ArborConfig:
     causal: bool = True
     tie_word_embeddings: bool = True
     
-    # Growth settings
+    # Growth settings (future-proofed for enterprise scale)
     growth_enabled: bool = True
+    growth_factor: float = 2.0  # Growth multiplier
+    max_growth_factor: float = 8.0  # Maximum total growth for enterprise scale
+    target_params: Optional[int] = None  # Target parameter count (e.g., 400B)
+    growth_schedule: str = "dynamic"  # "dynamic", "scheduled", "manual"
+    
+    # Enterprise scaling configuration
+    enterprise_scale: bool = False  # Enable enterprise scaling features
+    distributed_layers: bool = False  # Enable layer-wise distribution
+    tensor_parallel_size: int = 1  # Tensor parallelism factor
+    pipeline_parallel_size: int = 1  # Pipeline parallelism factor
+    
+    # Advanced architecture for enterprise (future)
+    num_key_value_heads: Optional[int] = None  # Grouped-query attention
+    rope_theta: float = 10000.0  # RoPE base frequency
+    attention_bias: bool = True  # Attention bias
     
     # Adaptive context settings
     adaptive_context: bool = True
     context_router_layers: int = 3
     min_context_length: int = 1024
     max_context_length: int = None  # Will use max_seq_length
+    
+    # Future-proofing for multimodal (roadmap)
+    multimodal_enabled: bool = False
+    vision_config: Optional[Dict] = None
+    audio_config: Optional[Dict] = None
     
     def __post_init__(self):
         """Validate configuration."""
@@ -69,11 +89,11 @@ class ArborTransformer(nn.Module):
         super().__init__()
         self.config = config
         
-        # Token embeddings
+        # Token embeddings with padding support
         self.token_embedding = ExpandableEmbedding(
             vocab_size=config.vocab_size,
             embed_dim=config.dim,
-            padding_idx=None,  # TODO: Add padding token support
+            padding_idx=0,  # Use token 0 as padding token (standard practice)
         )
         
         # Positional encoding

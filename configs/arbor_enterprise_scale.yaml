@@ -1,0 +1,208 @@
+# Arbor Enterprise Scale Configuration
+# Future-proof configuration for 200B-400B parameter models
+# This is a roadmap configuration for enterprise deployment
+
+# Note: This configuration is for future enterprise models
+# Current research preview uses training_config.yaml (799M parameters)
+
+model:
+  # Enterprise scale architecture
+  vocab_size: 128000                    # Hermes-4-405B vocabulary
+  hidden_size: 8192                     # Large hidden dimension for enterprise scale
+  num_layers: 80                        # Deep architecture for complex reasoning
+  num_attention_heads: 64               # High attention head count
+  intermediate_size: 32768              # Large FFN for capacity
+  max_position_embeddings: 2097152      # 2M context length capability
+  
+  # Advanced architecture features
+  num_key_value_heads: 8                # Grouped-query attention for efficiency
+  rope_theta: 500000.0                  # Extended RoPE for long context
+  attention_bias: false                 # Bias-free attention
+  
+  # Growth configuration for enterprise scale
+  growth:
+    enabled: true
+    factor: 4.0                         # Higher growth factor for enterprise
+    threshold: 0.9                      # Earlier expansion trigger
+    max_expansions: 5                   # Multiple growth phases
+    target_size: 400000000000           # 400B parameter target
+    
+# Adaptive context for enterprise workloads
+adaptive_context:
+  enabled: true
+  
+  # Enterprise router configuration
+  router_config:
+    hidden_size: 1024                   # Larger router for complex analysis
+    num_layers: 6                       # Deeper analysis capability
+    num_attention_heads: 16             # More attention heads
+    
+  # Extended context ranges for enterprise tasks
+  task_contexts:
+    chat: [2048, 8192]                  # Enhanced chat capability
+    code: [8192, 65536]                 # Large code analysis
+    reasoning: [16384, 131072]          # Complex reasoning tasks
+    document: [65536, 2097152]          # Full document processing (2M tokens)
+    creative: [4096, 32768]             # Extended creative tasks
+    qa: [2048, 16384]                   # Enhanced Q&A
+    summary: [8192, 131072]             # Large document summarization
+    translation: [4096, 16384]          # Extended translation capability
+    research: [32768, 524288]           # Research paper analysis
+    legal: [16384, 262144]              # Legal document processing
+    
+# Enterprise training configuration
+training:
+  # Distributed training settings
+  distributed:
+    enabled: true
+    backend: "nccl"                     # NVIDIA collective communications
+    num_nodes: 32                       # Multi-node training
+    num_gpus_per_node: 8               # 8 GPU per node
+    total_gpus: 256                     # 256 GPU total
+    
+  # Advanced optimization
+  learning_rate: 1e-5                   # Conservative LR for large models
+  weight_decay: 0.1                     # Strong regularization
+  beta1: 0.9
+  beta2: 0.95
+  eps: 1e-8
+  
+  # Enterprise training schedule  
+  max_steps: 1000000                    # Extended training
+  warmup_steps: 10000                   # Longer warmup
+  lr_scheduler_type: "cosine_with_restarts"
+  
+  # Memory and efficiency
+  gradient_checkpointing: true
+  activation_checkpointing: true        # Activation checkpointing
+  cpu_offload: true                     # CPU memory offload
+  parameter_sharding: true              # Parameter sharding (ZeRO)
+  optimizer_sharding: true              # Optimizer state sharding
+  
+  # Mixed precision for enterprise
+  bf16: true                            # BF16 for stability
+  fp16: false                           # Avoid FP16 instability
+  loss_scaling: "dynamic"               # Dynamic loss scaling
+  
+  # Batch configuration for enterprise
+  micro_batch_size: 1                   # Small micro batches
+  global_batch_size: 2048               # Large global batch
+  gradient_accumulation_steps: 8192     # High accumulation
+  
+# Enterprise datasets
+datasets:
+  # Large-scale training data
+  - name: "web_crawl"
+    source: "enterprise/web_crawl"
+    split: "train"
+    size: "10TB"                        # Large dataset
+    preprocessing:
+      max_length: 32768                 # Long sequences
+      quality_filtering: true           # High-quality data only
+      
+  - name: "code_repositories" 
+    source: "enterprise/code_data"
+    split: "train"
+    size: "5TB"
+    preprocessing:
+      max_length: 65536                 # Very long code files
+      language_filtering: true          # Multi-language support
+      
+  - name: "scientific_papers"
+    source: "enterprise/papers"
+    split: "train" 
+    size: "2TB"
+    preprocessing:
+      max_length: 131072                # Full paper length
+      citation_processing: true         # Process citations
+      
+  - name: "legal_documents"
+    source: "enterprise/legal"
+    split: "train"
+    size: "1TB" 
+    preprocessing:
+      max_length: 262144                # Very long legal documents
+      jurisdiction_tagging: true        # Legal jurisdiction tags
+
+# Enterprise infrastructure
+infrastructure:
+  # Compute requirements
+  cluster:
+    nodes: 32                           # 32 compute nodes
+    gpus_per_node: 8                    # H100 80GB recommended
+    cpu_cores_per_node: 128             # High CPU count
+    memory_per_node: "2TB"              # Large system memory
+    interconnect: "InfiniBand"          # High-speed networking
+    
+  # Storage requirements  
+  storage:
+    training_data: "50TB"               # Training dataset storage
+    checkpoints: "10TB"                 # Model checkpoint storage
+    logs: "1TB"                         # Training logs
+    bandwidth: "100GB/s"                # High-speed storage
+    
+  # Monitoring and reliability
+  monitoring:
+    enabled: true
+    metrics_retention: "1year"          # Long-term metrics
+    alert_thresholds:
+      loss_spike: 2.0                   # Loss spike detection
+      memory_usage: 0.9                 # Memory usage alerts
+      gradient_norm: 10.0               # Gradient norm monitoring
+      
+# Enterprise deployment
+deployment:
+  # Model serving
+  serving:
+    framework: "vllm"                   # Optimized serving
+    tensor_parallel: 8                  # Multi-GPU serving
+    pipeline_parallel: 4                # Pipeline parallelism
+    max_concurrent_requests: 1000       # High throughput
+    
+  # API configuration
+  api:
+    rate_limiting: true                 # Rate limiting
+    authentication: "oauth2"            # Enterprise auth
+    monitoring: true                    # API monitoring
+    caching: true                       # Response caching
+    
+# Compliance and security
+compliance:
+  data_governance:
+    encryption_at_rest: true            # Data encryption
+    encryption_in_transit: true         # Transport encryption
+    audit_logging: true                 # Complete audit trail
+    data_retention: "7years"            # Compliance retention
+    
+  model_governance:
+    version_control: true               # Model versioning
+    lineage_tracking: true              # Data/model lineage
+    bias_monitoring: true               # Bias detection
+    performance_monitoring: true        # Performance tracking
+
+# Future features (roadmap)
+roadmap_features:
+  multimodal:
+    enabled: false                      # Future: multimodal capability
+    vision: false                       # Image understanding
+    audio: false                        # Audio processing
+    
+  reasoning:
+    chain_of_thought: false             # Advanced reasoning
+    tool_usage: false                   # Tool integration
+    planning: false                     # Multi-step planning
+    
+  efficiency:
+    mixture_of_experts: false           # MoE architecture
+    sparse_attention: false             # Sparse attention patterns
+    dynamic_routing: false              # Dynamic expert routing
+
+# Note: This configuration requires enterprise-grade infrastructure
+# Estimated requirements:
+# - 256x H100 80GB GPUs
+# - 32 nodes with InfiniBand networking  
+# - 64TB system memory
+# - 100TB high-speed storage
+# - Estimated training cost: $2-5M USD
+# - Training time: 2-6 months
+# - Power consumption: ~2-5MW

@@ -122,13 +122,66 @@ class ArborBlock(nn.Module):
         Args:
             add_heads: Number of attention heads to add
             
-        Note: This is more complex and requires careful weight initialization.
-        For now, this is a placeholder for future implementation.
+        Note: This requires careful weight initialization and preservation.
         """
-        # TODO: Implement attention head expansion
-        # This requires careful handling of the query, key, value projections
-        # and the output projection matrix
-        raise NotImplementedError("Attention head expansion not yet implemented")
+        if add_heads <= 0:
+            return
+            
+        old_num_heads = self.num_heads
+        new_num_heads = old_num_heads + add_heads
+        
+        # Calculate dimensions
+        head_dim = self.dim // old_num_heads
+        new_dim_per_layer = new_num_heads * head_dim
+        
+        # Store old weights
+        old_qkv = self.attention.qkv_proj
+        old_output = self.attention.output_proj
+        
+        # Create new larger layers
+        new_qkv = nn.Linear(self.dim, new_dim_per_layer * 3, bias=old_qkv.bias is not None)
+        new_output = nn.Linear(new_dim_per_layer, self.dim, bias=old_output.bias is not None)
+        
+        # Copy existing weights to preserve learned representations
+        with torch.no_grad():
+            # For QKV projection: copy existing weights and initialize new heads
+            old_qkv_dim = old_num_heads * head_dim
+            
+            # Q weights
+            new_qkv.weight[:old_qkv_dim, :].copy_(old_qkv.weight[:old_qkv_dim, :])
+            # K weights  
+            new_qkv.weight[new_dim_per_layer:new_dim_per_layer+old_qkv_dim, :].copy_(
+                old_qkv.weight[old_qkv_dim:old_qkv_dim*2, :])
+            # V weights
+            new_qkv.weight[new_dim_per_layer*2:new_dim_per_layer*2+old_qkv_dim, :].copy_(
+                old_qkv.weight[old_qkv_dim*2:, :])
+            
+            # Initialize new heads with small random values
+            nn.init.normal_(new_qkv.weight[old_qkv_dim:new_dim_per_layer, :], std=0.02)
+            nn.init.normal_(new_qkv.weight[new_dim_per_layer+old_qkv_dim:new_dim_per_layer*2, :], std=0.02)
+            nn.init.normal_(new_qkv.weight[new_dim_per_layer*2+old_qkv_dim:, :], std=0.02)
+            
+            # Copy bias if present
+            if old_qkv.bias is not None:
+                new_qkv.bias[:old_qkv_dim].copy_(old_qkv.bias[:old_qkv_dim])
+                new_qkv.bias[new_dim_per_layer:new_dim_per_layer+old_qkv_dim].copy_(
+                    old_qkv.bias[old_qkv_dim:old_qkv_dim*2])
+                new_qkv.bias[new_dim_per_layer*2:new_dim_per_layer*2+old_qkv_dim].copy_(
+                    old_qkv.bias[old_qkv_dim*2:])
+                
+            # For output projection: pad with zeros for new heads
+            new_output.weight[:, :old_qkv_dim].copy_(old_output.weight)
+            nn.init.zeros_(new_output.weight[:, old_qkv_dim:])  # Initialize new head outputs to zero
+            
+            if old_output.bias is not None:
+                new_output.bias.copy_(old_output.bias)
+        
+        # Replace the layers
+        self.attention.qkv_proj = new_qkv
+        self.attention.output_proj = new_output
+        self.num_heads = new_num_heads
+        
+        print(f"🧠 Expanded attention heads: {old_num_heads} → {new_num_heads}")
     
     def param_count(self) -> int:
         """Return total number of parameters in this block."""

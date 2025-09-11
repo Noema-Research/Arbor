@@ -193,7 +193,45 @@ class ArborPostTrainer:
         else:
             # Native Arbor model
             # Try to load Arbor config and model
-            raise NotImplementedError("Native Arbor model loading not yet implemented")
+            import json
+            
+            # Load Arbor configuration
+            config_path = Path(model_path) / "config.json"
+            if config_path.exists():
+                with open(config_path) as f:
+                    config_dict = json.load(f)
+                
+                # Try to load as enterprise config first
+                try:
+                    from ..modeling.enterprise import EnterpriseArborConfig, EnterpriseArborTransformer
+                    if "target_params" in config_dict:
+                        model_config = EnterpriseArborConfig(**config_dict)
+                        self.model = EnterpriseArborTransformer(model_config)
+                        print(f"   Loaded Enterprise Arbor model ({model_config.target_params/1e9:.1f}B params)")
+                    else:
+                        raise ValueError("Not an enterprise config")
+                except:
+                    # Fall back to standard Arbor config
+                    from ..modeling.model import ArborConfig, ArborTransformer
+                    model_config = ArborConfig(**config_dict)
+                    self.model = ArborTransformer(model_config)
+                    print(f"   Loaded Arbor model ({model_config.vocab_size} vocab, {model_config.dim} dim)")
+                
+                # Load model weights
+                model_weights_path = Path(model_path) / "pytorch_model.bin"
+                if model_weights_path.exists():
+                    state_dict = torch.load(model_weights_path, map_location="cpu")
+                    self.model.load_state_dict(state_dict)
+                    print(f"   Loaded model weights from {model_weights_path}")
+                else:
+                    print(f"   No weights found, using randomly initialized model")
+                
+                self.model = self.model.to(
+                    dtype=torch.bfloat16 if self.config.use_fp16 else torch.float32,
+                    device_map="auto"
+                )
+            else:
+                raise ValueError(f"No Arbor config found at {config_path}")
     
     def _load_huggingface_model(self):
         """Load model from HuggingFace Hub."""
